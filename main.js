@@ -1,276 +1,284 @@
 import PptxGenJS from 'pptxgenjs';
 
-// ─── STATE ───────────────────────────────────────────────────────
-const state = {
-    answers: JSON.parse(sessionStorage.getItem('sn_answers') || '{}'),
+// ── STATE ─────────────────────────────────────────────────────────
+const S = {
+    ans: JSON.parse(sessionStorage.getItem('sn_a') || '{}'),
     projectName: '', presenterName: '', deck: null,
-    save() { sessionStorage.setItem('sn_answers', JSON.stringify(this.answers)); }
+    save() { sessionStorage.setItem('sn_a', JSON.stringify(this.ans)); }
 };
 
-// ─── QUESTIONS (YC-advisor tone, 8+ chips each) ───────────────────
-const QUESTIONS = [
-    {
-        id: 'problem', num: '01',
-        opener: 'Every great project starts with something broken. Let\'s find yours.',
-        title: 'What problem are you obsessed with?',
-        guidance: 'Don\'t describe a feature. Describe the frustration. The best problems are ones people work around every day and have accepted as normal.',
-        placeholder: 'e.g. Freelance designers spend 6h/week on invoicing. They hate it, but there\'s no tool that fits their workflow.',
-        chips: ['Who wakes up frustrated by this?', 'What\'s the workaround people use today?', 'How expensive is this problem to ignore?', 'When did you first notice this gap?', 'What\'s getting worse, not better?', 'Is this a nice-to-have or a must-fix?', 'Why hasn\'t it been solved yet?', 'How do you know this is real — not just your problem?']
-    },
-    {
-        id: 'solution', num: '02',
-        opener: 'Now for your moment of clarity. What do you actually do?',
-        title: 'What\'s your answer to the mess?',
-        guidance: 'Resist the urge to list features. Describe the shift — the before and after. What becomes possible that wasn\'t before?',
-        placeholder: 'e.g. We automate invoice creation from design files. One click. The designer never opens a spreadsheet again.',
-        chips: ['The core mechanic in one sentence', 'Before vs. after for your user', 'What\'s the \'oh wow\' moment?', 'What would make it irreplaceable?', 'What does day 1 look like?', 'Is it a vitamin or a painkiller?', 'What makes it sticky over time?', 'What are you choosing NOT to do?']
-    },
-    {
-        id: 'clients', num: '03',
-        opener: 'Be specific. "Everyone" is not a customer.',
-        title: 'Who is this actually for?',
-        guidance: 'Describe the early adopter specifically — not a demographic, but a behavior. Who would pay for this the moment it exists?',
-        placeholder: 'e.g. Independent designers who invoice >5 clients/month, use Figma, and currently use Excel or FreshBooks reluctantly.',
-        chips: ['Early adopter in one sentence', 'What do they do Monday morning?', 'Where do they hang out online?', 'What do they complain about publicly?', 'What do they already pay for?', 'What are they NOT willing to change?', 'Who refers them to solutions today?', 'What would make them switch instantly?']
-    },
-    {
-        id: 'goals', num: '04',
-        opener: 'What does winning look like for you? Not in theory — in numbers.',
-        title: 'What does success look like in 12 months?',
-        guidance: 'Specific targets create accountability. Vague goals stall projects. What\'s the number you\'d be proud to share at a dinner table?',
-        placeholder: 'e.g. 500 paying users, €5k MRR, 80% weekly active rate. Secondary: featured at one major design conference.',
-        chips: ['Revenue target?', 'User / customer count?', 'Geography?', 'Retention goal?', 'What\'s the signal this is working?', 'What would make you pivot?', 'What\'s the 3-year version?', 'What does failure look like, and how will you catch it early?']
-    },
-    {
-        id: 'scope', num: '05',
-        opener: 'Boundaries are not limitations — they\'re your strategy made visible.',
-        title: 'What are you building first, and what are you explicitly leaving out?',
-        guidance: 'The fastest projects ship a narrow, opinionated version first. What\'s in v1? What goes on the "not yet" list?',
-        placeholder: 'e.g. V1: invoice generation only, PDF export. NOT in scope: payment collection, CRM, team accounts.',
-        chips: ['V1 in 3 bullets', 'What\'s deliberately excluded?', 'Time to first usable product?', 'What could derail scope?', 'What are you saying no to (and why)?', 'What\'s the next natural expansion?', 'Geographic or language constraints?', 'Regulatory or compliance limits?']
-    },
-    {
-        id: 'competitors', num: '06',
-        opener: 'If you think you have no competitors, you haven\'t looked hard enough.',
-        title: 'Who else is playing in this space — and why isn\'t that good enough?',
-        guidance: 'Name real alternatives honestly. Then name your unfair advantage. If it\'s just "better UX", go deeper.',
-        placeholder: 'e.g. FreshBooks, HoneyBook, plain Excel. Their weakness: built for accountants, not designers. Our edge: integrates directly with Figma workflow.',
-        chips: ['Direct competitors?', 'What do people use today instead?', 'What does the incumbent do well?', 'Where does the incumbent fail your user?', 'Your unfair advantage (be ruthlessly honest)', 'What would a competitor copy first?', 'What can\'t they copy?', 'Market trend working in your favor?']
-    },
-    {
-        id: 'progress', num: '07',
-        opener: 'Show me you\'ve left the building. Momentum matters more than plans.',
-        title: 'What have you built or learned already?',
-        guidance: 'Early signal — even a conversation, a prototype, a rejection — proves you\'re learning. What do you know now that you didn\'t 3 months ago?',
-        placeholder: 'e.g. 12 user interviews. Built a Figma plugin prototype (230 installs). 3 designers paying €29/mo for early access.',
-        chips: ['Users spoken to?', 'Prototype or MVP status?', 'First paying customer?', 'Key learning that changed your thinking?', 'What surprised you?', 'What didn\'t work?', 'Partners or advisors involved?', 'Press, community, or organic interest?']
-    },
-    {
-        id: 'team', num: '08',
-        opener: 'Ideas are common. Execution is rare. Who\'s doing the work?',
-        title: 'Who is building this, and why are you the right team?',
-        guidance: 'The honest version. Not a LinkedIn bio — what makes this team uniquely equipped for this specific problem?',
-        placeholder: 'e.g. Two co-founders: one ex-Figma designer (10y exp), one Rails engineer (shipped 4 products). We met building freelance tools for ourselves.',
-        chips: ['Core team in 2 lines', 'What is each person\'s superpower?', 'Why this problem — what\'s personal about it?', 'What\'s missing from the team today?', 'Advisors or mentors?', 'Full-time or part-time?', 'History working together?', 'Biggest team risk?']
-    },
-    {
-        id: 'resources', num: '09',
-        opener: 'Money is a resource. So is time, relationships, and IP. What do you have?',
-        title: 'What\'s your current position, and what do you need most?',
-        guidance: 'Be honest about your runway and your top 3 constraints. Investors and partners respect clarity over optimism.',
-        placeholder: 'e.g. €40k personal savings. 6 months runway. Need: €150k seed to hire one more engineer and run paid pilots.',
-        chips: ['Current funding / runway?', 'Revenue (if any)?', 'Top 3 resource needs?', 'What\'s the most expensive assumption?', 'Strategic relationships you have?', 'Intellectual property / patents?', 'What would change with 10× the resources?', 'First priority if funded tomorrow?']
-    },
-    {
-        id: 'risks', num: '10',
-        opener: 'Every project has a version where it fails. Let\'s find yours first.',
-        title: 'What could kill this — and how are you thinking about it?',
-        guidance: 'Naming risks shows maturity. For each one, have a mitigation. Investors fund teams who see around corners.',
-        placeholder: 'e.g. Risk: Figma changes their API. Mitigation: building export-agnostic core. Risk: designer market too small. Mitigation: expand to all creative freelancers.',
-        chips: ['Biggest single risk?', 'Technical risks?', 'Market timing risk?', 'Regulatory risk?', 'Dependency risk (platforms, APIs)?', 'Team / execution risk?', 'What\'s your early warning signal?', 'What would make you stop and pivot?']
-    },
-    {
-        id: 'market', num: '11',
-        opener: 'Size matters — but so does the shape of the opportunity.',
-        title: 'How big is this, and why is now the right moment?',
-        guidance: 'Bottom-up estimates are more credible than TAM slides. Start with: how many of your target user exist, and what would they pay? Then multiply.',
-        placeholder: 'e.g. 4M independent designers globally. 20% invoice regularly. At €29/mo, SAM = $278M. Our initial target: EU, 50k designers.',
-        chips: ['How many target users exist?', 'What do they currently spend on this problem?', 'What\'s your realistic market share in 3 years?', 'Is the market growing or shrinking?', 'What macro trend is pushing this?', 'Adjacent markets you could expand into?', 'Who else is investing in this space?', 'Why is now better than 2 years ago?']
-    },
-    {
-        id: 'model', num: '12',
-        opener: 'The last question is the first one investors ask. Let\'s make it count.',
-        title: 'How does this make money — and when does it start?',
-        guidance: 'Simple is better. The more complex your revenue model sounds, the less you\'ve tested it. What does the unit economics look like?',
-        placeholder: 'e.g. SaaS. €29/mo individual, €99/mo team. First revenue: month 1 from beta users. 12-month target: €5k MRR.',
-        chips: ['Pricing model?', 'Revenue streams?', 'When does first revenue arrive?', 'Customer acquisition cost (estimated)?', 'Lifetime value (estimated)?', 'Payback period?', 'Freemium or paid-first?', 'What pricing have you tested?']
-    }
+// ── QUESTIONS ─────────────────────────────────────────────────────
+const Q = [
+  { id:'problem', num:'01', slide:'Problem Statement',
+    opener:"Every great project starts with something broken. Let's uncover yours.",
+    title:"What specific problem are you solving?",
+    guidance:"Name the real pain with evidence. The best problems feel urgent and provable — not a vague observation but a specific frustration people work around every day.",
+    placeholder:"e.g. Product managers spend 6h/week manually consolidating feedback from 4+ tools into one report. It's error-prone and nobody questions it anymore.",
+    chips:["Who experiences this daily?","What evidence proves it's real?","What's the current workaround?","What happens if no one solves it?","Why is it urgent right now?","How often does this occur?","What does inaction cost in time or money?","Is this your personal pain too?"],
+    refine:"Rewrite this as a crisp 2-sentence problem statement naming: the specific person affected, the specific friction, and one piece of evidence. Avoid 'inefficiency' or 'challenges'. Be concrete. Source:"},
+  { id:'solution', num:'02', slide:'Solution',
+    opener:"Now for your moment of clarity. What does the world look like after your project?",
+    title:"Walk me through the before and after.",
+    guidance:"Describe the BEFORE (current state, friction, workarounds) and the AFTER (what's measurably better). One number — time saved, errors eliminated, cost reduced — makes this slide unforgettable.",
+    placeholder:"e.g. Before: 4 tabs open, copy-paste into Excel, 2h of re-formatting. After: one dashboard, all sources merged, report auto-generates in 3 minutes.",
+    chips:["Current process step by step?","The single biggest friction point?","Before vs. after in a number","What gets completely removed?","What becomes possible that wasn't?","What's the 'aha' moment for users?","What would make it irreplaceable?","What are you deliberately NOT doing?"],
+    refine:"Rewrite as a tight BEFORE/AFTER contrast. BEFORE: current state including friction and workarounds (3-4 bullets). AFTER: improved state with one measurable improvement (3-4 bullets). Parallel structure, no buzzwords. Source:"},
+  { id:'clients', num:'03', slide:'Target Clients',
+    opener:"Be specific. 'Everyone' is not a customer — not yet.",
+    title:"Who benefits most, and how does their day change?",
+    guidance:"Describe 2–3 segments with precision — not demographics, but behaviors and frustrations. For each: what's their specific pain, and what concrete change does your solution bring?",
+    placeholder:"e.g. (1) Solo PMs at SaaS startups — drown in Notion + Jira + Intercom. (2) Heads of Product — need exec-ready weekly reports, currently built manually in Google Slides.",
+    chips:["Each segment's specific daily frustration?","What do they currently pay for this problem?","Who is the early adopter?","Where do they discover solutions?","How does their week change after?","What's their win condition?","Who refers them to tools today?","What would make them switch instantly?"],
+    refine:"For each client segment write: [Role/context] — [2-sentence pain specific to that role] — [1 outcome sentence starting 'With this, they can...']. Keep each under 60 words. Source:"},
+  { id:'goals', num:'04', slide:'Goal & Success Metrics',
+    opener:"What does winning look like? Not in theory — in numbers that make you nervous to commit to.",
+    title:"State your goal and your 3 non-negotiable success metrics.",
+    guidance:"Goal: what, by when, measured how. Then 3 Critical-to-Quality metrics — the non-negotiables — each with a target number and a measurement method. Vague metrics get ignored.",
+    placeholder:"e.g. Goal: 500 active paying users by Dec 2026. Metric 1: user activates within 24h (target >70%). Metric 2: 30-day retention (>60%). Metric 3: NPS >45.",
+    chips:["Main goal in one sentence?","3 metrics you'd be proud to report?","How do you measure each metric?","What would trigger a pivot?","6-month milestone?","What does failure look like early?","How do you catch failure before it's too late?","What's the moonshot version?"],
+    refine:"Write one goal sentence: 'By [date], achieve [outcome] measured by [metric].' Then 3 CTQ rows: name (3-5 words), description, numeric target, measurement method. No 'improve satisfaction'. Source:"},
+  { id:'scope', num:'05', slide:'Scope Definition',
+    opener:"Clarity about what you're NOT building is as strategic as what you are.",
+    title:"What's in v1 — and what's explicitly out?",
+    guidance:"List 3–5 things you ARE definitely doing, and 3–5 things you're explicitly not doing yet. Each out-of-scope item should name why — future phase, separate team, regulatory, resource constraint.",
+    placeholder:"e.g. IN: invoice generation from Figma exports, PDF download, basic dashboard. OUT: payment collection (phase 2), team accounts (future), mobile app (resource).",
+    chips:["V1 features in 3 bullets?","Reason for each out-of-scope item?","Time to first usable product?","What could cause scope creep?","Systems or teams excluded?","Geographic limits?","What's the natural phase 2?","What are you saying no to permanently?"],
+    refine:"Rewrite scope items so each IN SCOPE item is verifiable (not 'improve UX' but 'redesign checkout for mobile') and each OUT OF SCOPE item names the reason for exclusion. Max 5 per column. Source:"},
+  { id:'competitors', num:'06', slide:'Competitive Landscape',
+    opener:"If you think you have no competitors, you haven't looked hard enough.",
+    title:"Who else plays here — and what's your defensible edge?",
+    guidance:"Name 2–3 real alternatives. Pick 4 criteria that matter most to your users. Be honest about where competitors do well. Your advantage must be specific — not just 'better UX'.",
+    placeholder:"e.g. Alternatives: ProductBoard, Notion, manual Excel. Criteria: setup time, integrations, report automation, price. Gap: none auto-generate PM reports from live data.",
+    chips:["Direct competitors by name?","What do people use today instead?","4 criteria that matter most?","Where does the incumbent win?","Where do they fail your user?","Your unfair advantage (be ruthless)?","What can't they easily copy?","What trend is working in your favor?"],
+    refine:"Create a comparison: 4 criteria rows × 3 columns (Competitor A, Competitor B, Our Approach). Each cell: 5-10 words, honest. If no direct competitors, frame as 'Current Alternatives'. Source:"},
+  { id:'progress', num:'07', slide:'Progress & Findings',
+    opener:"Show me you've left the building. Evidence beats plans every time.",
+    title:"What have you done, and what did you actually learn?",
+    guidance:"Replace claims with evidence. Three headline numbers + three key findings demonstrate rigor. The most compelling finding is one that surprised you or changed your thinking.",
+    placeholder:"e.g. 18 user interviews. 2 prototype rounds (230 Figma plugin installs). Finding: 14/18 said report consolidation was their #1 weekly time-sink. Surprise: they don't want AI to write — just gather.",
+    chips:["Research done so far?","Users / stakeholders spoken to?","Prototype or MVP status?","3 most important findings?","What surprised you most?","What changed your original thinking?","What didn't work?","Evidence it's technically feasible?"],
+    refine:"Extract 3 headline statistics. Then write 3 key findings: (1) what research confirmed with a quote or data point, (2) a surprising insight or pivot, (3) the signal that justifies moving forward. Be specific. Source:"},
+  { id:'team', num:'08', slide:'Team',
+    opener:"Investors bet on people as much as ideas. Why is THIS team the right one?",
+    title:"Who is building this — and why are you uniquely equipped?",
+    guidance:"Not a LinkedIn bio. What makes each person specifically essential for this exact problem? The story of how you came to it matters as much as credentials.",
+    placeholder:"e.g. [Name]: PM at Atlassian 6y, built first Jira-Slack integration. This is literally her own problem. [Name]: ex-Stripe engineer, shipped 3 B2B SaaS tools.",
+    chips:["Core team in 2 lines each?","Why this problem — personal connection?","Each person's one superpower?","Full-time or part-time?","History working together?","Advisors or sponsors?","What's missing from the team today?","Biggest team risk?"],
+    refine:"Rewrite each person as: [Name] — [Role] — [One sentence: why THIS person is essential to THIS project's success, not just 'experienced']. Make it feel personal. Source:"},
+  { id:'resources', num:'09', slide:'Resources',
+    opener:"Show me you've done the math. Vague resource asks get rejected.",
+    title:"What do you have, and what do you specifically need?",
+    guidance:"HAVE: specific items with amounts or names. NEED: specific items with estimated cost or effort. Not 'some budget' but '€50k from Q3 fund'. Not 'more devs' but '2 backend engineers for 6 months'.",
+    placeholder:"e.g. HAVE: €40k savings, 1 part-time designer, Figma pro license. NEED: €150k seed (€80k eng hire, €40k pilot program, €30k ops). 6-month runway to first revenue.",
+    chips:["Current budget in numbers?","Committed partnerships or sponsors?","Specific roles still needed?","Tools or IP you already own?","Top 3 resource gaps?","Regulatory or legal requirements?","Strategic relationships you have?","First use of new funding?"],
+    refine:"Two parallel lists. HAVE: specific items with amounts or names. NEED: specific items with estimated cost or effort. Every entry should be actionable, not vague. Source:"},
+  { id:'risks', num:'10', slide:'Risk Assessment',
+    opener:"A team that names risks proactively is more credible than one promising smooth sailing.",
+    title:"What could kill this — and how are you addressing it?",
+    guidance:"Cover 4 categories: Delivery (execution), Operational (post-launch), Market (external), Dependency (vendors/approvals). Each risk needs a specific mitigation — not 'we'll monitor it'.",
+    placeholder:"e.g. Market: Figma API change (Medium) → mitigation: export-agnostic core. Delivery: scope creep (High) → mitigation: hard scope doc, weekly review. Dependency: GDPR (Medium) → legal review Q2.",
+    chips:["Biggest single risk?","Technical / delivery risks?","Market timing risks?","Vendor or API dependency risks?","Regulatory constraints?","Early warning signal for each risk?","Mitigation for your top 3?","What would make you stop and pivot?"],
+    refine:"Organize as a table: Category (Delivery/Operational/Market/Dependency), Risk Level (H/M/L), Specific Risk Scenario, Mitigation (owned action, not 'monitor'). 3-4 rows. Mitigations must be concrete. Source:"},
+  { id:'market', num:'11', slide:'Market Potential',
+    opener:"Size the prize — but bottom-up estimates beat slide-deck TAMs every time.",
+    title:"How big is the opportunity, and why is now the right moment?",
+    guidance:"TAM → SAM → SOM with the logic behind each number. Start with: how many target users exist, what they spend on this problem, your realistic share in 3 years. Source your numbers.",
+    placeholder:"e.g. TAM: PM tooling market $4.8B (Gartner 2024). SAM: mid-market SaaS PMs in EU+NA, ~400k users. SOM: 5k users at €29/mo by end of Y2 = €1.74M ARR.",
+    chips:["Total market size + source?","Your specific addressable segment?","Realistic user count in 3 years?","Revenue per user per year?","Market growing or shrinking?","Macro trend driving this now?","Adjacent markets to expand into?","Why now is better than 2 years ago?"],
+    refine:"Structure as TAM/SAM/SOM. For each level, one sentence explaining the logic behind the number, not just the number. Flag numbers that need source citation. Source:"},
+  { id:'model', num:'12', slide:'Business Model',
+    opener:"Last question — first one investors ask. Let's make it count.",
+    title:"How does this make money, and when does the first euro arrive?",
+    guidance:"Pricing model + price point + how customers discover and buy + rough unit economics + Year 1–3 projections with ONE key assumption stated explicitly. Simpler always wins.",
+    placeholder:"e.g. SaaS: €29/mo individual / €99/mo team. Discovery: PLG via Figma plugin store. CAC ~€80, LTV ~€580 (20mo avg). Y1: €60k ARR. Y2: €240k. Key assumption: 3% free-to-paid conversion.",
+    chips:["Pricing model + price point?","How does the customer discover you?","How do they actually buy?","Customer acquisition cost estimate?","Lifetime value estimate?","When does first revenue arrive?","Y1/Y2/Y3 revenue targets?","The one key assumption behind projections?"],
+    refine:"Four sections: (1) Pricing Model — model name + price point justified in one sentence. (2) Sales Model — how discovered and purchased. (3) Unit Economics — CAC, LTV, payback (estimates ok). (4) Revenue Forecast — Y1/2/3 with ONE stated key assumption. Source:"}
 ];
 
-const PHRASES = [
-    'Reading between the lines...', 'Finding the thread...', 'Shaping your narrative...',
-    'Trimming the noise...', 'Building the arc...', 'Almost there — polishing...'
-];
+const PHRASES = ['Reading between the lines...','Connecting the dots...','Building your narrative...','Sharpening the language...','Almost there — polishing...','Worth the wait.'];
 
-// ─── CURSOR ──────────────────────────────────────────────────────
+// ── IMPROVE PANEL ─────────────────────────────────────────────────
+let improveEl = null;
+function createImprovePanel() {
+    improveEl = document.createElement('div');
+    improveEl.style.cssText = 'position:fixed;inset:0;z-index:8000;background:rgba(8,8,8,.97);display:flex;align-items:center;justify-content:center;padding:40px;opacity:0;pointer-events:none;transition:opacity .3s;';
+    improveEl.innerHTML = `
+        <div style="max-width:680px;width:100%;border:1px solid rgba(255,255,255,.1);padding:48px;position:relative;background:#0d0d0d;">
+            <button id="imp-close" style="position:absolute;top:16px;right:20px;font-size:22px;background:none;border:none;color:rgba(255,255,255,.4);cursor:default;">×</button>
+            <p style="font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#E30613;margin-bottom:10px;">REFINE WITH AI</p>
+            <h3 style="font-size:22px;font-weight:700;margin-bottom:8px;">Copy this prompt into Claude or ChatGPT</h3>
+            <p style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:24px;">Paste the prompt below into any AI to get a sharper, deck-ready version of your answer.</p>
+            <textarea id="imp-prompt" style="width:100%;height:220px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#fff;padding:18px;font-size:13px;font-family:Inter,sans-serif;resize:none;outline:none;line-height:1.6;" readonly></textarea>
+            <button id="imp-copy" style="margin-top:16px;width:100%;height:50px;background:#fff;color:#000;border:none;font-size:13px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;">Copy to clipboard</button>
+        </div>`;
+    document.body.appendChild(improveEl);
+    improveEl.querySelector('#imp-close').onclick = closeImprove;
+    improveEl.onclick = e => { if (e.target === improveEl) closeImprove(); };
+    improveEl.querySelector('#imp-copy').onclick = () => {
+        navigator.clipboard.writeText(improveEl.querySelector('#imp-prompt').value).then(() => {
+            improveEl.querySelector('#imp-copy').textContent = '✓ Copied!';
+            setTimeout(() => { improveEl.querySelector('#imp-copy').textContent = 'Copy to clipboard'; }, 2000);
+        });
+    };
+}
+function openImprove(prompt) {
+    if (!improveEl) createImprovePanel();
+    improveEl.querySelector('#imp-prompt').value = prompt;
+    improveEl.style.opacity = '1'; improveEl.style.pointerEvents = 'all';
+}
+function closeImprove() { improveEl.style.opacity = '0'; improveEl.style.pointerEvents = 'none'; }
+
+// ── CURSOR ────────────────────────────────────────────────────────
 const cursor = document.getElementById('cursor');
 document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
+    cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
     document.getElementById('bg-layer').style.setProperty('--mx', (e.clientX / window.innerWidth * 100) + '%');
     document.getElementById('bg-layer').style.setProperty('--my', (e.clientY / window.innerHeight * 100) + '%');
-    const t = e.target;
-    cursor.classList.toggle('ring', !!(t.closest('a,button') && !t.closest('textarea,input')));
+    cursor.classList.toggle('ring', !!(e.target.closest('a,button') && !e.target.closest('textarea,input')));
 });
 document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
 document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
 
-// ─── HEADER ──────────────────────────────────────────────────────
+// ── HEADER ────────────────────────────────────────────────────────
 window.addEventListener('scroll', () => {
-    document.getElementById('hdr').style.borderBottomColor = window.scrollY > 10 ? 'rgba(255,255,255,0.12)' : 'rgba(255,255,255,0.06)';
+    document.getElementById('hdr').style.borderBottomColor = window.scrollY > 10 ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.06)';
 });
 document.getElementById('hdr-cta').onclick = () => document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
 document.getElementById('hero-cta').onclick = e => { e.preventDefault(); document.getElementById('generator').scrollIntoView({ behavior: 'smooth' }); };
 
-// ─── COOKIE ──────────────────────────────────────────────────────
-function initCookie() {
-    if (!localStorage.getItem('sn_consent')) document.getElementById('cookie-banner').classList.remove('hidden');
-}
-document.getElementById('ck-accept').onclick = () => { localStorage.setItem('sn_consent', 'accepted'); document.getElementById('cookie-banner').classList.add('hidden'); };
-document.getElementById('ck-reject').onclick = () => { localStorage.setItem('sn_consent', 'rejected'); document.getElementById('cookie-banner').classList.add('hidden'); };
+// ── COOKIE ────────────────────────────────────────────────────────
+function initCookie() { if (!localStorage.getItem('sn_c')) document.getElementById('cookie-banner').classList.remove('hidden'); }
+document.getElementById('ck-accept').onclick = () => { localStorage.setItem('sn_c','accepted'); document.getElementById('cookie-banner').classList.add('hidden'); };
+document.getElementById('ck-reject').onclick = () => { localStorage.setItem('sn_c','rejected'); document.getElementById('cookie-banner').classList.add('hidden'); };
 
-// ─── MODALS ──────────────────────────────────────────────────────
-const privModal = document.getElementById('privacy-modal');
-function openPrivacy(e) { e.preventDefault(); privModal.classList.add('open'); }
-document.getElementById('fp-privacy').onclick = openPrivacy;
-document.getElementById('fp-terms').onclick = openPrivacy;
-document.querySelectorAll('.fp-privacy-link,.fp-terms-link').forEach(a => a.onclick = openPrivacy);
-document.getElementById('modal-close').onclick = () => privModal.classList.remove('open');
-privModal.onclick = e => { if (e.target === privModal) privModal.classList.remove('open'); };
+// ── MODAL ─────────────────────────────────────────────────────────
+const modal = document.getElementById('privacy-modal');
+function openModal(e) { e.preventDefault(); modal.classList.add('open'); }
+document.getElementById('fp-legal').onclick = openModal;
+document.querySelectorAll('.fp-legal-link').forEach(a => a.onclick = openModal);
+document.getElementById('modal-close').onclick = () => modal.classList.remove('open');
+modal.onclick = e => { if (e.target === modal) modal.classList.remove('open'); };
 
-// ─── VIEWS ───────────────────────────────────────────────────────
+// ── VIEWS ─────────────────────────────────────────────────────────
 function show(id) {
-    ['wizard-view', 'confirm-view', 'loading-view', 'result-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
+    ['wizard-view','confirm-view','loading-view','result-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
     document.getElementById(id).classList.remove('hidden');
 }
 
-// ─── WIZARD ──────────────────────────────────────────────────────
+// ── WIZARD ────────────────────────────────────────────────────────
 function renderStep(idx) {
-    const q = QUESTIONS[idx];
+    const q = Q[idx];
     document.getElementById('prog-wrap').classList.remove('hidden');
     document.getElementById('prog-count').textContent = `${q.num} / 12`;
     document.getElementById('prog-fill').style.width = `${((idx + 1) / 12) * 100}%`;
-
     const wv = document.getElementById('wizard-view');
     wv.classList.remove('hidden');
     wv.innerHTML = `
-        <span class="q-label">${q.num} / 12</span>
+        <span class="q-label">${q.num} / 12 — ${q.slide}</span>
         <p class="q-opener">${q.opener}</p>
         <h2 class="q-title">${q.title}</h2>
         <p class="q-guidance">${q.guidance}</p>
-        <div class="chips">${q.chips.map(c => `<span class="q-chip" data-chip="${c.replace(/"/g, '&quot;')}">${c}</span>`).join('')}</div>
-        <textarea id="q-ta" placeholder="${q.placeholder}">${state.answers[q.id] || ''}</textarea>
-        <div class="char-meta"><span id="char-n">${(state.answers[q.id] || '').length}</span> chars</div>
+        <div class="chips">${q.chips.map(c => `<span class="q-chip" data-chip="${c.replace(/"/g,'&quot;')}">${c}</span>`).join('')}</div>
+        <textarea id="q-ta" placeholder="${q.placeholder}">${S.ans[q.id] || ''}</textarea>
+        <div class="char-meta" style="justify-content:space-between">
+            <button id="btn-improve" style="font-size:12px;font-weight:600;background:none;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);padding:6px 16px;letter-spacing:.1em;text-transform:uppercase;transition:all .2s">✦ Refine this answer</button>
+            <span><span id="char-n">${(S.ans[q.id]||'').length}</span> chars</span>
+        </div>
         <div class="wiz-nav">
-            <button class="btn-back" id="btn-back" style="visibility:${idx === 0 ? 'hidden' : 'visible'}">← Back</button>
-            <button class="btn-next" id="btn-next">${idx === 11 ? 'Review →' : 'Continue →'}</button>
+            <button class="btn-back" id="btn-back" style="visibility:${idx===0?'hidden':'visible'}">← Back</button>
+            <button class="btn-next" id="btn-next">${idx===11?'Review →':'Continue →'}</button>
         </div>`;
-
     const ta = document.getElementById('q-ta');
     wv.querySelectorAll('.q-chip').forEach(chip => {
         chip.onclick = () => {
             ta.value += (ta.value.trim() ? '\n\n' : '') + chip.dataset.chip + ': ';
             ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length;
-            state.answers[q.id] = ta.value; state.save();
+            S.ans[q.id] = ta.value; S.save();
             document.getElementById('char-n').textContent = ta.value.length;
         };
     });
-    ta.addEventListener('input', () => {
-        state.answers[q.id] = ta.value; state.save();
-        document.getElementById('char-n').textContent = ta.value.length;
-    });
+    ta.addEventListener('input', () => { S.ans[q.id] = ta.value; S.save(); document.getElementById('char-n').textContent = ta.value.length; });
+    document.getElementById('btn-improve').onclick = () => {
+        const raw = ta.value.trim();
+        const prompt = `${q.refine}\n\n"${raw || '[No answer yet — add your notes first]'}"`;
+        openImprove(prompt);
+    };
     document.getElementById('btn-next').onclick = () => idx < 11 ? renderStep(idx + 1) : showConfirm();
     document.getElementById('btn-back').onclick = () => renderStep(idx - 1);
     ta.focus();
 }
 
-function showConfirm() {
-    show('confirm-view');
-    document.getElementById('prog-wrap').classList.add('hidden');
-}
+function showConfirm() { show('confirm-view'); document.getElementById('prog-wrap').classList.add('hidden'); }
 
 document.getElementById('ans-toggle').onclick = () => {
     const list = document.getElementById('ans-list');
     const open = list.classList.toggle('open');
     document.getElementById('ans-arrow').textContent = open ? '↑' : '↓';
-    if (open) list.innerHTML = QUESTIONS.map(q => `
+    if (open) list.innerHTML = Q.map(q => `
         <div class="ans-row">
-            <div class="ans-q">${q.num}. ${q.title}</div>
-            <div class="ans-a">${state.answers[q.id] || '<em style="color:rgba(255,255,255,.3)">Not answered</em>'}</div>
+            <div class="ans-q">${q.num}. ${q.slide}</div>
+            <div class="ans-a">${S.ans[q.id] || '<em style="color:rgba(255,255,255,.25)">Not answered</em>'}</div>
         </div>`).join('');
 };
 
-// ─── GENERATE ────────────────────────────────────────────────────
+// ── GENERATE ──────────────────────────────────────────────────────
 document.getElementById('btn-gen').onclick = async () => {
     const name = document.getElementById('proj-name').value.trim();
-    if (!name) { document.getElementById('proj-name').focus(); document.getElementById('proj-name').style.borderColor = '#E30613'; return; }
-    state.projectName = name;
-    state.presenterName = document.getElementById('pres-name').value.trim();
+    if (!name) { document.getElementById('proj-name').style.borderColor = '#E30613'; document.getElementById('proj-name').focus(); return; }
+    S.projectName = name; S.presenterName = document.getElementById('pres-name').value.trim();
     show('loading-view');
-
-    let pi = 0;
-    const pe = document.getElementById('load-phrase');
-    const interval = setInterval(() => { pi = (pi + 1) % PHRASES.length; pe.textContent = PHRASES[pi]; }, 2600);
-
-    try { state.deck = await generate(state); } finally { clearInterval(interval); }
-    showResults(state.deck);
+    let pi = 0; const pe = document.getElementById('load-phrase');
+    const iv = setInterval(() => { pi = (pi + 1) % PHRASES.length; pe.textContent = PHRASES[pi]; }, 2600);
+    try { S.deck = await apiGen(S); } finally { clearInterval(iv); }
+    showResults(S.deck);
 };
 
-// ─── AI ──────────────────────────────────────────────────────────
-async function generate(st) {
-    const answersText = QUESTIONS.map(q => `[${q.title}]:\n${st.answers[q.id] || 'not provided'}`).join('\n\n');
-    const prompt = `[INST] You are a senior partner at a top startup accelerator. You've reviewed thousands of pitches.
+// ── API ───────────────────────────────────────────────────────────
+async function apiGen(st) {
+    const answersText = Q.map(q => `[${q.slide}]:\n${st.ans[q.id] || 'not answered'}`).join('\n\n');
+    const prompt = `[INST] You are a senior product strategist at a top startup accelerator. Transform these raw project notes into a board-ready presentation deck.
 
-Transform these raw project notes into a board-ready presentation. Project: "${st.projectName}"${st.presenterName ? `, by ${st.presenterName}` : ''}.
+Project: "${st.projectName}"${st.presenterName ? `, by ${st.presenterName}` : ''}
 
-RAW INPUT:
+RAW ANSWERS:
 ${answersText}
 
 CRITICAL RULES:
-- Rewrite everything in confident, executive language. Never parrot the input.
-- Each slide has ONE core insight — not a list of facts.
-- If data is missing, output [placeholder text in brackets].
-- Tone: clear, human, intelligent. No buzzwords, no filler.
-- The last slide (13) should be titled "Validate Your Assumptions" and contain 5 specific prompts the user can paste into ChatGPT or Claude to verify market data, competitive analysis, and assumptions.
+- Rewrite everything in confident, evidence-first executive language. Never parrot the input.
+- Each slide has ONE core insight — a bold, specific headline that stands alone without the body.
+- If data is missing, write [placeholder: what's needed here] — never leave a blank.
+- No buzzwords: no 'synergy', 'leverage', 'disruptive', 'innovative', 'holistic'.
+- Titles should be active and specific: not 'Our Solution' but 'From 4-Hour Reviews to 3-Minute Automated Reports'.
+- Every claim backed by evidence or labeled as an estimate.
 
-Return ONLY valid JSON:
+Return ONLY valid JSON (no markdown, no preamble):
 {
   "deck_title": "string",
   "tagline": "One sharp line",
   "slides": [
-    { "n": 1, "title": "string", "insight": "One sentence insight", "points": ["point","point","point"], "stat": "Optional bold number or fact" }
+    { "n": 1, "title": "string", "headline": "Bold specific headline 8-12 words", "insight": "One sentence insight", "points": ["point","point","point","point"], "stat": "Optional bold datapoint or callout" }
   ]
 }
 
-Generate exactly 13 slides. Arc: Cover → Problem → Solution → Who It's For → Goals → Scope → Competitive Landscape → Traction → Team → Resources & Needs → Risks & Mitigations → Market Opportunity → Validate Your Assumptions. [/INST]`;
+Generate exactly 13 slides. Arc: Cover → Problem Statement → Solution → Target Clients → Goal & Success Metrics → Scope Definition → Competitive Landscape → Progress & Findings → Team → Resources → Risk Assessment → Market Potential → Business Model. [/INST]`;
 
     const HF = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
     const deadline = Date.now() + 150000;
     while (Date.now() < deadline) {
         try {
             document.getElementById('load-sub').textContent = 'Contacting AI...';
-            const res = await fetch(HF, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            const res = await fetch(HF, { method:'POST', headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({ inputs: prompt, parameters: { max_new_tokens: 3500, temperature: 0.62, return_full_text: false } }) });
-            if (res.status === 503) { document.getElementById('load-sub').textContent = 'AI warming up, hold tight...'; await sleep(5000); continue; }
+            if (res.status === 503) { document.getElementById('load-sub').textContent = 'AI warming up — hold tight...'; await sleep(5000); continue; }
             if (!res.ok) throw new Error('HTTP ' + res.status);
             const data = await res.json();
             const text = data[0]?.generated_text || '';
             const j0 = text.indexOf('{'), j1 = text.lastIndexOf('}');
-            if (j0 === -1) throw new Error('No JSON');
+            if (j0 === -1) throw new Error('No JSON in response');
             return JSON.parse(text.substring(j0, j1 + 1));
-        } catch (e) {
+        } catch(e) {
             console.warn('AI attempt failed:', e.message);
-            document.getElementById('load-sub').textContent = 'Retrying...';
+            document.getElementById('load-sub').textContent = 'Having trouble connecting — trying again...';
             if (Date.now() > deadline - 120000) break;
             await sleep(3500);
         }
@@ -279,150 +287,125 @@ Generate exactly 13 slides. Arc: Cover → Problem → Solution → Who It's For
 }
 
 function fallback(st) {
-    const slides = QUESTIONS.map((q, i) => ({
-        n: i + 1, title: q.title,
-        insight: '[AI will refine this — add your key insight here]',
-        points: (st.answers[q.id] || '').split(/[.\n]/).map(s => s.trim()).filter(s => s.length > 4).slice(0, 4),
-        stat: ''
+    const slides = Q.map((q, i) => ({
+        n: i + 1, title: q.slide,
+        headline: `[AI couldn't connect — use the prompt below to complete this slide]`,
+        insight: st.ans[q.id] ? st.ans[q.id].substring(0, 180).trim() + (st.ans[q.id].length > 180 ? '...' : '') : '[No answer — return to questionnaire to add your notes]',
+        points: [`Paste into Claude / ChatGPT to complete this slide:\n\n${q.refine}\n\n"${st.ans[q.id] || '[Add your answer here]'}"`],
+        stat: '← Copy this prompt into any AI'
     }));
     slides.push({
         n: 13, title: 'Validate Your Assumptions',
-        insight: 'Use these prompts in ChatGPT or Claude to pressure-test your deck before your next meeting.',
+        headline: '5 prompts to pressure-test your deck before presenting',
+        insight: 'Copy any prompt below into Claude or ChatGPT to verify data, competition, and assumptions.',
         points: [
-            `"What is the total addressable market for [${st.projectName}] in [target geography]? Provide sources."`,
-            `"List the top 5 competitors in the [your market] space and compare their pricing, features, and weaknesses."`,
-            `"What are the most common reasons startups in [your sector] fail? How should ${st.projectName} mitigate these?"`,
-            `"What macro trends are driving demand for [your solution] in [current year]? Cite data."`,
-            `"If I had 6 months and €50k, what's the fastest way to validate the core assumption of this project: [your core assumption]?"`
+            `"What is the total addressable market for ${st.projectName} in [target geography]? Cite sources and note the year."`,
+            `"List the top 5 competitors or alternatives in the [your market] space. Compare pricing, key features, and their main weaknesses."`,
+            `"What are the most common failure modes for projects like ${st.projectName}? How should a team mitigate them?"`,
+            `"What macro trends in 2025-2026 are driving demand for [your solution]? Include named datasets or reports."`,
+            `"If a team had 6 months and €50k, what's the fastest way to validate the core assumption behind ${st.projectName}?"`
         ],
         stat: 'AI-verified data = credible pitch'
     });
-    return { deck_title: st.projectName, tagline: '[Your one-line pitch]', slides };
+    return { deck_title: st.projectName, tagline: '[Your one-line pitch — what this project does and for whom]', slides };
 }
 
-// ─── RESULTS ─────────────────────────────────────────────────────
+// ── RESULTS ───────────────────────────────────────────────────────
 function showResults(deck) {
     show('result-view');
-    const labels = ['Cover','Problem','Solution','Audience','Goals','Scope','Competition','Traction','Team','Resources','Risks','Market','Validate'];
     document.getElementById('slide-preview').innerHTML = deck.slides.map((s, i) => `
         <div class="slide-row">
             <div class="slide-num">${String(s.n || i+1).padStart(2,'0')}</div>
             <div>
-                <div class="slide-title">${s.title || labels[i] || 'Slide ' + (i+1)}</div>
-                <div class="slide-sub">${s.insight || ''}</div>
+                <div class="slide-title">${s.title}</div>
+                <div class="slide-sub">${s.headline || s.insight || ''}</div>
             </div>
         </div>`).join('');
 }
 
-document.getElementById('btn-dl').onclick = () => state.deck ? buildPPTX(state.deck, state.projectName, state.presenterName) : null;
-document.getElementById('btn-restart').onclick = () => { sessionStorage.removeItem('sn_answers'); location.reload(); };
+document.getElementById('btn-dl').onclick = () => S.deck ? buildPPTX(S.deck, S.projectName, S.presenterName) : null;
+document.getElementById('btn-restart').onclick = () => { sessionStorage.removeItem('sn_a'); location.reload(); };
 
-// ─── PPTX (Swiss modular grid) ───────────────────────────────────
+// ── PPTX — Swiss modular grid ─────────────────────────────────────
 function buildPPTX(deck, projectName, presenterName) {
     const pptx = new PptxGenJS();
-    pptx.layout = 'LAYOUT_WIDE'; // 13.33 × 7.5 inches
-
-    const C = { black: '0A0A0A', white: 'FFFFFF', red: 'E30613', gray: '666666', lgray: 'EBEBEB', mgray: 'CCCCCC', offwhite: 'F7F7F7' };
-    const F = { bold: 'Helvetica Neue', reg: 'Helvetica Neue' };
+    pptx.layout = 'LAYOUT_WIDE'; // 13.33 × 7.5 in
+    const C = { black:'0A0A0A', white:'FFFFFF', red:'E30613', gray:'666666', lgray:'E8E8E8', mgray:'BBBBBB', offblack:'1A1A1A' };
 
     deck.slides.forEach((s, idx) => {
         const slide = pptx.addSlide();
+        const num = s.n || idx + 1;
+        const total = deck.slides.length;
 
         if (idx === 0) {
-            // ── COVER ─────────── full black, large type
+            // ── COVER ──────────────────────────────────────────────
             slide.background = { fill: C.black };
-            // Left red column
-            slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.18, h: '100%', fill: C.red });
-            // Grid lines (subtle)
-            slide.addShape(pptx.ShapeType.rect, { x: 0.18, y: 3.5, w: '100%', h: 0.008, fill: '222222' });
-            // Project name massive
+            slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:0.2, h:'100%', fill:C.red });
             slide.addText((deck.deck_title || projectName).toUpperCase(), {
-                x: 0.48, y: 1.6, w: 11.5, h: 1.8,
-                fontSize: 64, bold: true, color: C.white, fontFace: F.bold, charSpacing: -1.5
-            });
-            // Tagline
-            slide.addText(deck.tagline || '[Your one-line pitch]', {
-                x: 0.48, y: 3.65, w: 9, fontSize: 20, color: '999999', fontFace: F.reg, italic: true
-            });
-            // Red accent line
-            slide.addShape(pptx.ShapeType.rect, { x: 0.48, y: 3.55, w: 2.4, h: 0.06, fill: C.red });
-            // Meta info
-            if (presenterName) slide.addText(presenterName.toUpperCase(), { x: 0.48, y: 5.8, w: 5, fontSize: 11, color: C.gray, fontFace: F.bold, charSpacing: 2 });
-            const dateStr = new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }).toUpperCase();
-            slide.addText(dateStr, { x: 0.48, y: 6.15, w: 5, fontSize: 10, color: '555555', fontFace: F.reg });
-            // Slide number
-            slide.addText('01 / ' + deck.slides.length, { x: 11.5, y: 6.9, w: 1.6, align: 'right', fontSize: 9, color: '444444', fontFace: F.reg });
+                x:0.5, y:1.7, w:12, fontSize:56, bold:true, color:C.white, fontFace:'Helvetica Neue', charSpacing:-1 });
+            slide.addShape(pptx.ShapeType.rect, { x:0.5, y:3.5, w:3.2, h:0.06, fill:C.red });
+            slide.addText(deck.tagline || '[One-line pitch]', {
+                x:0.5, y:3.7, w:9.5, fontSize:20, color:'999999', fontFace:'Helvetica Neue', italic:true });
+            if (presenterName) slide.addText(presenterName.toUpperCase(), { x:0.5, y:5.7, w:6, fontSize:10, color:C.gray, fontFace:'Helvetica Neue', bold:true, charSpacing:2.5 });
+            slide.addText(new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'}).toUpperCase(), { x:0.5, y:6.1, w:6, fontSize:9, color:'555555', fontFace:'Helvetica Neue' });
+            slide.addText(`01 / ${total}`, { x:11.3, y:7.0, w:1.8, align:'right', fontSize:8, color:'444444', fontFace:'Helvetica Neue' });
 
-        } else if (idx === deck.slides.length - 1) {
-            // ── VALIDATE SLIDE ── different treatment
+        } else if (num === total) {
+            // ── VALIDATE SLIDE ─────────────────────────────────────
             slide.background = { fill: C.black };
-            slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.22, fill: C.red });
-            slide.addText('VALIDATE YOUR ASSUMPTIONS', { x: 0.5, y: 0.48, w: 12, fontSize: 11, bold: true, color: C.red, fontFace: F.bold, charSpacing: 3 });
-            slide.addText(s.title || 'Validate', { x: 0.5, y: 0.82, w: 12, fontSize: 34, bold: true, color: C.white, fontFace: F.bold, charSpacing: -0.5 });
-            slide.addText(s.insight || 'Use these prompts to verify your key assumptions.', { x: 0.5, y: 1.6, w: 12, fontSize: 15, color: '999999', fontFace: F.reg, italic: true });
-            slide.addShape(pptx.ShapeType.rect, { x: 0.5, y: 2.05, w: 12, h: 0.008, fill: '2A2A2A' });
-            const pts = (s.points || []).slice(0, 5);
-            pts.forEach((pt, pi) => {
-                const y = 2.25 + pi * 0.96;
-                slide.addShape(pptx.ShapeType.rect, { x: 0.5, y, w: 0.04, h: 0.58, fill: C.red });
-                // Prompt label
-                slide.addText(`PROMPT ${pi + 1}`, { x: 0.7, y, w: 1.4, fontSize: 8, bold: true, color: C.red, fontFace: F.bold, charSpacing: 2 });
-                slide.addText(pt, { x: 0.7, y: y + 0.18, w: 12, fontSize: 12, color: 'CCCCCC', fontFace: F.reg, lineSpacingMultiple: 1.3 });
+            slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:'100%', h:0.2, fill:C.red });
+            slide.addText('VALIDATE YOUR ASSUMPTIONS', { x:0.5, y:0.38, w:12, fontSize:10, bold:true, color:C.red, fontFace:'Helvetica Neue', charSpacing:3 });
+            slide.addText(s.headline || s.title, { x:0.5, y:0.72, w:12, fontSize:32, bold:true, color:C.white, fontFace:'Helvetica Neue', charSpacing:-0.5 });
+            slide.addText(s.insight || '', { x:0.5, y:1.55, w:12, fontSize:14, color:'888888', fontFace:'Helvetica Neue', italic:true });
+            slide.addShape(pptx.ShapeType.rect, { x:0.5, y:2.0, w:12.3, h:0.008, fill:'2A2A2A' });
+            (s.points||[]).slice(0,5).forEach((pt, pi) => {
+                const y = 2.2 + pi * 0.95;
+                slide.addShape(pptx.ShapeType.rect, { x:0.5, y, w:0.05, h:0.55, fill:C.red });
+                slide.addText(`PROMPT ${pi+1}`, { x:0.7, y, w:1.5, fontSize:8, bold:true, color:C.red, fontFace:'Helvetica Neue', charSpacing:2 });
+                slide.addText(pt, { x:0.7, y:y+0.2, w:12.1, fontSize:11.5, color:'CCCCCC', fontFace:'Helvetica Neue', lineSpacingMultiple:1.35 });
             });
-            slide.addText(`${String(idx + 1).padStart(2,'0')} / ${deck.slides.length}`, { x: 11.5, y: 6.9, w: 1.6, align: 'right', fontSize: 9, color: '444444' });
+            slide.addText(`${String(num).padStart(2,'0')} / ${total}`, { x:11.3, y:7.0, w:1.8, align:'right', fontSize:8, color:'444444' });
 
         } else {
-            // ── CONTENT SLIDES ── Swiss modular grid
+            // ── CONTENT SLIDES — Swiss grid ────────────────────────
             slide.background = { fill: C.white };
-
-            // Top red rule
-            slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.16, fill: C.red });
-
-            // Slide number (top left, small)
-            slide.addText(String(idx + 1).padStart(2, '0'), { x: 0.45, y: 0.3, w: 0.8, fontSize: 11, bold: true, color: C.red, fontFace: F.bold });
-
-            // Slide title (large, dark)
-            const title = (s.title || '').toUpperCase();
-            slide.addText(title, {
-                x: 0.45, y: 0.58, w: 8.5, fontSize: 32, bold: true, color: C.black,
-                fontFace: F.bold, charSpacing: -0.5, lineSpacingMultiple: 1.1
-            });
-
-            // Horizontal divider
-            slide.addShape(pptx.ShapeType.rect, { x: 0.45, y: 1.58, w: 12.3, h: 0.012, fill: C.lgray });
-
-            // INSIGHT (left column — prominent)
-            slide.addText('CORE INSIGHT', { x: 0.45, y: 1.76, w: 5.6, fontSize: 8, bold: true, color: C.red, fontFace: F.bold, charSpacing: 2.5 });
-            slide.addText(s.insight || '[Key insight for this slide]', {
-                x: 0.45, y: 2.05, w: 5.4, fontSize: 18, color: C.black,
-                fontFace: F.reg, lineSpacingMultiple: 1.5, italic: true
-            });
-
-            // Stat / callout (left, bottom)
+            // Red rule top
+            slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:'100%', h:0.15, fill:C.red });
+            // Slide number
+            slide.addText(String(num).padStart(2,'0'), { x:0.44, y:0.28, w:0.7, fontSize:10, bold:true, color:C.red, fontFace:'Helvetica Neue' });
+            // Slide name label
+            slide.addText((s.title||'').toUpperCase(), { x:1.1, y:0.28, w:10, fontSize:10, bold:true, color:'AAAAAA', fontFace:'Helvetica Neue', charSpacing:1.5 });
+            // Main headline — large and specific
+            slide.addText(s.headline || s.title, {
+                x:0.44, y:0.62, w:12.3, fontSize:30, bold:true, color:C.black,
+                fontFace:'Helvetica Neue', charSpacing:-0.4, lineSpacingMultiple:1.1 });
+            // Horizontal rule
+            slide.addShape(pptx.ShapeType.rect, { x:0.44, y:1.6, w:12.3, h:0.01, fill:C.lgray });
+            // LEFT COLUMN — Core Insight
+            slide.addText('CORE INSIGHT', { x:0.44, y:1.74, w:5.6, fontSize:8, bold:true, color:C.red, fontFace:'Helvetica Neue', charSpacing:2.5 });
+            slide.addText(s.insight || '[Core insight for this slide]', {
+                x:0.44, y:2.06, w:5.4, fontSize:17, color:C.black,
+                fontFace:'Helvetica Neue', lineSpacingMultiple:1.55, italic:true });
+            // Stat callout (bottom left), if present
             if (s.stat) {
-                slide.addShape(pptx.ShapeType.rect, { x: 0.45, y: 4.8, w: 5.4, h: 1.3, fill: C.black });
-                slide.addText(s.stat, { x: 0.55, y: 4.95, w: 5.2, fontSize: 22, bold: true, color: C.white, fontFace: F.bold, lineSpacingMultiple: 1.2 });
+                slide.addShape(pptx.ShapeType.rect, { x:0.44, y:5.0, w:5.4, h:1.28, fill:C.black });
+                slide.addText(s.stat, { x:0.56, y:5.12, w:5.2, fontSize:20, bold:true, color:C.white, fontFace:'Helvetica Neue', lineSpacingMultiple:1.25 });
             }
-
-            // Vertical column divider
-            slide.addShape(pptx.ShapeType.rect, { x: 6.15, y: 1.58, w: 0.012, h: 5.5, fill: C.lgray });
-
-            // KEY POINTS (right column)
-            slide.addText('KEY POINTS', { x: 6.35, y: 1.76, w: 6.5, fontSize: 8, bold: true, color: C.gray, fontFace: F.bold, charSpacing: 2.5 });
-            const pts = (s.points || []).slice(0, 5);
-            pts.forEach((pt, pi) => {
-                const y = 2.05 + pi * 1.08;
-                slide.addShape(pptx.ShapeType.rect, { x: 6.35, y, w: 0.2, h: 0.2, fill: C.red });
+            // Vertical divider
+            slide.addShape(pptx.ShapeType.rect, { x:6.2, y:1.6, w:0.01, h:5.6, fill:C.lgray });
+            // RIGHT COLUMN — Key Points
+            slide.addText('KEY POINTS', { x:6.4, y:1.74, w:6.5, fontSize:8, bold:true, color:C.gray, fontFace:'Helvetica Neue', charSpacing:2.5 });
+            (s.points||[]).slice(0,5).forEach((pt, pi) => {
+                const y = 2.06 + pi * 1.06;
+                slide.addShape(pptx.ShapeType.rect, { x:6.4, y:y+0.04, w:0.18, h:0.18, fill:C.red });
                 slide.addText(pt || '[Key point]', {
-                    x: 6.72, y: y - 0.05, w: 6.3, fontSize: 14, color: C.black,
-                    fontFace: F.reg, lineSpacingMultiple: 1.4
-                });
+                    x:6.74, y:y, w:6.3, fontSize:13.5, color:C.black,
+                    fontFace:'Helvetica Neue', lineSpacingMultiple:1.45 });
             });
-
-            // Footer rule + project name
-            slide.addShape(pptx.ShapeType.rect, { x: 0, y: 7.22, w: '100%', h: 0.008, fill: C.lgray });
-            slide.addText((projectName || deck.deck_title).toUpperCase(), { x: 0.45, y: 7.3, w: 6, fontSize: 8, color: C.mgray, fontFace: F.bold, charSpacing: 2 });
-            slide.addText(`${String(idx + 1).padStart(2,'0')} / ${deck.slides.length}`, { x: 11.5, y: 7.3, w: 1.6, align: 'right', fontSize: 8, color: C.mgray });
+            // Footer rule
+            slide.addShape(pptx.ShapeType.rect, { x:0, y:7.22, w:'100%', h:0.008, fill:C.lgray });
+            slide.addText((projectName || deck.deck_title || '').toUpperCase(), { x:0.44, y:7.3, w:7, fontSize:7.5, color:C.mgray, fontFace:'Helvetica Neue', bold:true, charSpacing:2 });
+            slide.addText(`${String(num).padStart(2,'0')} / ${total}`, { x:11.3, y:7.3, w:1.8, align:'right', fontSize:7.5, color:C.mgray });
         }
     });
 
@@ -432,7 +415,7 @@ function buildPPTX(deck, projectName, presenterName) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// ─── INIT ─────────────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────
 initCookie();
 renderStep(0);
 document.getElementById('prog-wrap').classList.remove('hidden');
