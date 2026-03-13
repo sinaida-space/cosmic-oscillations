@@ -11,7 +11,7 @@ const state = {
 const QUESTIONS = [
     {
         id: 'problem', num: '01',
-        opener: 'Every great project starts with something broken. Let's find yours.',
+        opener: 'Every great project starts with something broken. Let\'s find yours.',
         title: 'What problem are you obsessed with?',
         guidance: 'Don\'t describe a feature. Describe the frustration. The best problems are ones people work around every day and have accepted as normal.',
         placeholder: 'e.g. Freelance designers spend 6h/week on invoicing. They hate it, but there\'s no tool that fits their workflow.',
