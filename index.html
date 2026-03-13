@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sinaida AI — Pitch Deck Generator</title>
+    <meta name="description" content="Transform your startup idea into an executive investor pitch deck. Answer 12 structured questions. Download a board-ready PPTX in seconds.">
+    
+    <!-- Open Graph / Meta -->
+    <meta property="og:title" content="Sinaida AI — Pitch Deck Generator">
+    <meta property="og:description" content="Transform your startup idea into an executive investor pitch deck.">
+    <meta property="og:type" content="website">
+    
+    <!-- Favicon (Red square SVG) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23E30613%22/></svg>">
+
+    <style>
+        :root {
+            --color-black: #000000;
+            --color-white: #FFFFFF;
+            --color-red: #E30613;
+            --color-gray: #555555;
+            --color-light-gray: #F0F0F0;
+            --color-border: #EEEEEE;
+            --font-primary: "Helvetica Neue", Helvetica, Arial, sans-serif;
+            --grid-max: 1280px;
+            --header-height: 56px;
+        }
+
+        /* Base Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            border-radius: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: #0a0a0a;
+            color: var(--color-white);
+            line-height: 1.6;
+            font-weight: 400;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        /* Interactive Grainy Gradient */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(227, 6, 19, 0.15) 0%, rgba(10, 10, 10, 1) 50%);
+            transition: background 0.1s ease-out;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: -1;
+            mix-blend-mode: soft-light;
+        }
+
+        /* Custom Cursor */
+        #custom-cursor {
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            background: var(--color-red);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 11000;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: difference;
+            transition: width 0.3s ease, height 0.3s ease, background 0.3s ease;
+        }
+
+        #custom-cursor.active {
+            width: 100px;
+            height: 100px;
+            background: var(--color-white);
+            mix-blend-mode: difference;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 900;
+            color: black;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        #custom-cursor.active::after {
+            content: "EXPLORE";
+        }
+
+        .hero { 
+            cursor: none; 
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            text-transform: none;
+        }
+
+        button, a {
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.2s ease;
+        }
+
+        ul { list-style: none; }
+
+        .container {
+            max-width: var(--grid-max);
+            margin: 0 auto;
+            padding: 0 40px;
+        }
+
+        .grid-12 {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+
+        /* Visibility Utilities */
+        .hidden { display: none !important; }
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+        }
+
+        /* Sticky Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: var(--header-height);
+            background: transparent;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 60px;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .header.scrolled {
+            background: rgba(10, 10, 10, 0.8);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .logo-mark {
+            width: 16px;
+            height: 16px;
+            background: var(--color-red);
+        }
+
+        .nav {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-link {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--color-red);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            color: var(--color-red);
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .hero-title {
+            font-size: clamp(48px, 8vw, 96px);
+            line-height: 1.05;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            margin-bottom: 40px;
+            max-width: 500px;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            background: var(--color-red);
+            color: var(--color-white);
+            padding: 18px 48px;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            border: none;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(227, 6, 19, 0.3);
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 40px;
+            background: var(--color-red);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.2; }
+            100% { opacity: 1; }
+        }
+
+        /* How It Works */
+        .section-padding { padding: 120px 0; }
+        .border-bottom { border-bottom: 1px solid var(--color-black); }
+
+        .hiw-step {
+            position: relative;
+            padding-top: 20px;
+        }
+
+        .hiw-num {
+            position: absolute;
+            top: 0;
+            left: 0;
+            font-size: 96px;
+            color: var(--color-light-gray);
+            z-index: -1;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .hiw-title { font-size: 20px; margin-bottom: 12px; font-weight: 700; }
+        .hiw-desc { font-size: 16px; color: var(--color-gray); }
+
+        /* Generator Section */
+        #generator {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(20px);
+            padding: 80px 0 120px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .progress-wrapper {
+            position: sticky;
+            top: var(--header-height);
+            width: 100%;
+            background: transparent;
+            z-index: 100;
+            padding-bottom: 24px;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background: #E8E8E8;
+            width: 100%;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--color-red);
+            width: 8.33%;
+            transition: width 0.3s ease;
+        }
+
+        .step-counter {
+            font-size: 11px;
+            font-weight: 700;
+            text-align: right;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .step-card {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 56px 0;
+        }
+
+        .step-num {
+            font-size: 11px;
+            color: var(--color-red);
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .step-q { font-size: 28px; margin-bottom: 16px; }
+        .step-guidance { font-size: 15px; color: #555; margin-bottom: 32px; }
+
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--color-white);
+            padding: 24px;
+            font-size: 18px;
+            font-family: var(--font-primary);
+            resize: none;
+            outline: none;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus { 
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--color-red); 
+        }
+
+        .char-counter {
+            font-size: 14px;
+            color: #999;
+            text-align: right;
+            margin-bottom: 32px;
+        }
+
+        .wizard-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-btn {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Confirmation Card */
+        .confirm-card {
+            border: 1px solid var(--color-black);
+            padding: 56px;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        .input-group {
+            text-align: left;
+            margin-bottom: 24px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .input-text {
+            width: 100%;
+            height: 48px;
+            border: 1px solid var(--color-black);
+            padding: 0 16px;
+            font-size: 16px;
+        }
+
+        .accordion {
+            text-align: left;
+            margin: 40px 0;
+            border: 1px solid var(--color-black);
+        }
+
+        .accordion-header {
+            padding: 16px;
+            background: var(--color-white);
+            cursor: pointer;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .accordion-content {
+            padding: 0 16px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+
+        .accordion.open .accordion-content {
+            max-height: 2000px;
+            padding: 16px;
+        }
+
+        /* Loading */
+        .loader-container {
+            padding: 120px 0;
+            text-align: center;
+        }
+
+        .square-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 16px);
+            gap: 4px;
+            width: 36px;
+            margin: 0 auto 32px;
+        }
+
+        .square {
+            width: 16px;
+            height: 16px;
+            background: var(--color-black);
+            animation: squareRotate 2s infinite;
+        }
+
+        @keyframes squareRotate {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-text { font-weight: 700; margin-bottom: 8px; }
+        .warming-note { font-size: 14px; color: var(--color-gray); }
+
+        /* Results */
+        .results-header { margin-bottom: 40px; }
+        .slide-list { border: 1px solid var(--color-black); }
+        .slide-row {
+            padding: 16px;
+            display: flex;
+            gap: 24px;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .slide-row:nth-child(even) { background: #FAFAFA; }
+        .slide-row:last-child { border-bottom: none; }
+        .slide-row-num { color: var(--color-red); font-weight: 700; }
+
+        /* Footer */
+        .footer {
+            background: var(--color-black);
+            color: var(--color-white);
+            border-top: 3px solid var(--color-red);
+            padding: 64px 0 40px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 48px;
+            margin-bottom: 64px;
+        }
+
+        .footer-logo { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+        .footer-tag { font-size: 13px; color: #999; }
+        .footer-links a { display: block; margin-bottom: 12px; font-size: 13px; }
+        .footer-links a:hover { color: var(--color-red); }
+
+        .footer-bottom {
+            border-top: 1px solid #333;
+            padding-top: 24px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* Cookie Banner */
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--color-white);
+            border-top: 2px solid var(--color-black);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .cookie-actions { display: flex; gap: 16px; }
+        .btn-outline {
+            border: 1px solid var(--color-black);
+            padding: 12px 24px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* Privacy Policy */
+        .privacy-section { padding-top: var(--header-height); }
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(255,255,255,0.98);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal.open { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            max-width: 800px;
+            width: 100%;
+            background: #fff;
+            border: 1px solid #000;
+            padding: 56px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-close {
+            position: absolute;
+            top: 24px; right: 24px;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 90vh; /* Reduced height for cleaner look */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: var(--color-white);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+        }
+
+        @media (max-width: 768px) {
+            .nav { display: none; }
+            .grid-12 { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .cookie-banner { flex-direction: column; gap: 20px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div id="bg-canvas"></div>
+    <div class="noise-overlay"></div>
+    <div id="custom-cursor"></div>
+    <a href="#generator" class="visually-hidden">Skip to content</a>
+
+    <header class="header" id="header">
+        <div class="logo">
+            <div class="logo-mark"></div>
+            SINAIDA AI
+        </div>
+        <nav class="nav">
+            <a href="#how-it-works" class="nav-link">How it works</a>
+            <a href="#about" class="nav-link">About</a>
+            <a href="#privacy" class="nav-link">Privacy</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero" id="hero">
+            <a href="#generator" style="text-decoration:none; color:inherit; display:block; width:100%; height:100%;">
+                <div class="container" style="pointer-events:none;">
+                    <div class="hero-content">
+                        <span class="eyebrow">Idea → Investor Deck</span>
+                        <h1 class="hero-title">Turn your idea into an executive pitch.</h1>
+                        <p class="hero-subtitle">Answer 12 structured questions. Get a board-ready slide deck in seconds.</p>
+                    </div>
+                </div>
+            </a>
+            <div class="scroll-indicator"></div>
+        </section>
+
+        <section id="how-it-works" class="section-padding border-bottom">
+            <div class="container">
+                <span class="eyebrow">Process</span>
+                <h2 style="font-size: 48px; margin-bottom: 64px;">Three steps to a fundable pitch.</h2>
+                <div class="grid-12">
+                    <div class="hiw-step" style="grid-column: span 4;">
+                        <span class="hiw-num">01</span>
+                        <h3 class="hiw-title">Define your idea</h3>
+                        <p class="hiw-desc">Walk through 12 structured questions covering every dimension investors care about.</p>
+                    </div>
+                    <div class="hiw-step" style="grid-column: span 4;">
+                        <span class="hiw-num">02</span>
+                        <h3 class="hiw-title">Generate your deck</h3>
+                        <p class="hiw-desc">AI transforms your raw answers into sharp executive language and a structured narrative.</p>
+                    </div>
+                    <div class="hiw-step" style="grid-column: span 4;">
+                        <span class="hiw-num">03</span>
+                        <h3 class="hiw-title">Download and present</h3>
+                        <p class="hiw-desc">Get a ready-to-present PPTX file. Walk into any investor meeting prepared.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="section-padding border-bottom">
+            <div class="container grid-12">
+                <div style="grid-column: span 12; text-align: center;">
+                    <h2 style="font-size: 40px; margin-bottom: 24px;">Built to close the gap between a great idea and a fundable pitch.</h2>
+                    <p style="max-width: 800px; margin: 0 auto 40px;">The 12-question framework is based on proven startup evaluation methodology used by accelerators and investment committees. Sinaida AI turns that structure into a tool anyone can use.</p>
+                    <a href="#generator" class="btn-primary">Try it now →</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="generator">
+            <!-- Progress Bar -->
+            <div id="progress-container" class="progress-wrapper hidden">
+                <div class="container">
+                    <span id="step-count-text" class="step-counter">01 / 12</span>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container" id="generator-content">
+                <div id="wizard-view"></div>
+                
+                <div id="confirm-view" class="hidden">
+                    <div class="confirm-card">
+                        <h2 style="font-size: 40px; margin-bottom: 40px;">Ready to build your deck.</h2>
+                        <div class="input-group">
+                            <label>PROJECT NAME <span style="color:red">*</span></label>
+                            <input type="text" id="project-name" class="input-text" placeholder="e.g. Project Cosmic">
+                        </div>
+                        <div class="input-group">
+                            <label>PRESENTER NAME</label>
+                            <input type="text" id="presenter-name" class="input-text" placeholder="e.g. Jane Doe">
+                        </div>
+                        
+                        <div class="accordion" id="review-accordion">
+                            <div class="accordion-header">
+                                REVIEW YOUR ANSWERS <span>+</span>
+                            </div>
+                            <div class="accordion-content" id="review-list"></div>
+                        </div>
+
+                        <button id="generate-final-btn" class="btn-primary" style="width: 100%; height: 56px; font-size: 18px; background: var(--color-red);">Generate My Deck →</button>
+                        <p style="font-size: 13px; color: #999; margin-top: 16px;">Generated using Mistral AI via Hugging Face. Generation takes 20–40 seconds.</p>
+                    </div>
+                </div>
+
+                <div id="loading-view" class="hidden">
+                    <div class="loader-container">
+                        <div class="square-grid">
+                            <div class="square"></div>
+                            <div class="square"></div>
+                            <div class="square"></div>
+                            <div class="square"></div>
+                        </div>
+                        <p id="loading-status" class="status-text">Warming up the model...</p>
+                        <p id="warming-note" class="warming-note hidden">First run takes longer — the model is loading.</p>
+                        <button id="cancel-gen" style="margin-top: 32px; background:none; border:none; text-decoration:underline; font-size: 13px;">Cancel</button>
+                    </div>
+                </div>
+
+                <div id="result-view" class="hidden">
+                    <h2 style="font-size: 40px; margin-bottom: 40px;">Your deck is ready.</h2>
+                    <div class="slide-list" id="slide-preview"></div>
+                    <button id="download-btn" class="btn-primary" style="width: 100%; height: 56px; margin-top: 40px;">Download PPTX</button>
+                    <div style="text-align: center; margin-top: 32px;">
+                        <button id="restart-deck" style="color: var(--color-red); background:none; border:none; font-weight:700;">Start a new deck →</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div>
+                    <div class="footer-logo">SINAIDA AI</div>
+                    <div class="footer-tag">Shape your idea.</div>
+                </div>
+                <div class="footer-links">
+                    <a href="#how-it-works">How it Works</a>
+                    <a href="#generator">Generator</a>
+                    <a href="#about">About</a>
+                </div>
+                <div class="footer-links">
+                    <a href="#privacy">Privacy Policy</a>
+                    <a href="https://www.linkedin.com/in/sinaida/" target="_blank">Created by Sinaida</a>
+                </div>
+                <div>
+                    <div style="font-size: 13px; color: #999; margin-bottom: 8px;">Powered by Mistral AI via Hugging Face</div>
+                    <div style="font-size: 12px; color: #999;">© 2025 Sinaida AI.</div>
+                </div>
+            </div>
+            <div class="footer-bottom">No data stored. No accounts. No tracking.</div>
+        </div>
+    </footer>
+
+    <div id="privacy-modal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="UI.togglePrivacy(false)">×</span>
+            <h2 style="font-size: 40px; margin-bottom: 16px;">Privacy Policy</h2>
+            <p style="color: #999; margin-bottom: 24px;">Last updated: March 2026</p>
+            <h3>1. Who we are</h3>
+            <p>Sinaida AI. For inquiries, contact me via <a href="https://www.linkedin.com/in/sinaida/" target="_blank" style="color:red; text-decoration:underline;">LinkedIn</a>.</p>
+            <h3>2. What data we collect</h3>
+            <p>None stored server-side. All form answers exist only in your browser session. We prioritize your data sovereignty.</p>
+            <h3>3. API calls</h3>
+            <p>Your answers are sent to <a href="https://huggingface.co/" target="_blank" style="color:red; text-decoration:underline;">Hugging Face's</a> public Inference API for processing. No personal data is transmitted unless explicitly provided in your answers.</p>
+            <h3>4. Cookies</h3>
+            <p>Essential session cookie only (no tracking, no analytics).</p>
+        </div>
+    </div>
+
+    <div id="cookie-banner" class="cookie-banner hidden">
+        <p style="font-size: 14px;">We use only essential functional cookies. No tracking, no analytics.</p>
+        <div class="cookie-actions">
+            <button id="accept-cookies" class="btn-primary" style="padding: 12px 24px; font-size: 12px;">Accept All</button>
+            <button id="manage-cookies" class="btn-outline">Manage</button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PptxGenJS/3.12.0/pptxgen.bundled.js"></script>
+
+    <script>
+        const CONFIG = {
+            HF_API_URL: "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2",
+            POLL_INTERVAL: 5000,
+            MAX_POLL_TIME: 180000,
+            MAX_TOKENS: 2000,
+            TEMPERATURE: 0.7
+        };
+
+        const QUESTIONS = [
+            { id: "problem", num: "01", title: "What problem are you solving?", guideline: "Define the specific issue affecting an individual or business. What are the inefficiencies, limitations, accessibility issues, or high costs?" },
+            { id: "solution", num: "02", title: "How does your solution change things?", guideline: "Describe how your product or idea addresses the current state. Paint a before/after scenario." },
+            { id: "clients", num: "03", title: "Who are your potential clients?", guideline: "Why and how can your project make your clients' life easier or better? Be specific about the client profile." },
+            { id: "goals", num: "04", title: "What does success look like?", guideline: "What do you want to achieve? What are your critical-to-quality metrics — the measurable outcomes?" },
+            { id: "scope", num: "05", title: "What's in scope — and what's out?", guideline: "What are you working on in this project? What are you explicitly NOT taking into scope?" },
+            { id: "competitors", num: "06", title: "Who else is in this space?", guideline: "Identify competitors and highlight what makes your approach unique. What is your unfair advantage?" },
+            { id: "progress", num: "07", title: "What have you done so far?", guideline: "Summarize what's been done and key findings. Include results from customer discovery and metrics." },
+            { id: "team", num: "08", title: "Who is building this — and why will you win?", guideline: "Present your core team and expertise. Why are these specific people uniquely qualified?" },
+            { id: "resources", num: "09", title: "What do you have and what do you need?", guideline: "What resources — capital, tools, IP, partnerships — do you already have? What do you still need?" },
+            { id: "risks", num: "10", title: "What could go wrong?", guideline: "Identify the main delivery and operational risks. Describe your mitigation strategy." },
+            { id: "market", num: "11", title: "How big is the opportunity?", guideline: "What is the current market value for players in this niche? What share do you realistically aim to capture?" },
+            { id: "model", num: "12", title: "How do you make money?", guideline: "Describe your sales model, revenue streams, and path to profitability in plain terms." }
+        ];
+
+        class FormState {
+            constructor() {
+                this.answers = JSON.parse(sessionStorage.getItem('sinaida_form_state')) || {};
+                this.projectName = "";
+                this.presenterName = "";
+                this.generatedDeck = null;
+            }
+            save() { sessionStorage.setItem('sinaida_form_state', JSON.stringify(this.answers)); }
+            setAnswer(id, val) { this.answers[id] = val; this.save(); }
+            getAnswer(id) { return this.answers[id] || ""; }
+        }
+
+        const state = new FormState();
+
+        // Pure CSS/JS aesthetics, no Three.js
+
+        class APIClient {
+            static async generate(payload) {
+                const prompt = `[INST] You are an elite Venture Capital Pitch Strategist. 
+                Your mission: Transform raw founder notes into a professional, investor-ready slide deck.
+                
+                CRITICAL: YOU MUST REWRITE THE INPUT. DO NOT echo back what the user wrote.
+                - Use executive tone (e.g., "market penetration", "scalability", "competitive moat").
+                - Expand brief bullets into sophisticated, strategic slide content.
+                - Each slide must have a distinct, high-impact title and insight-driven subtitle.
+                
+                Project: ${payload.projectName}
+                Founder Input:
+                ${Object.values(payload.answers).join(" | ")}
+
+                Output ONLY a JSON object with this exact shape:
+                {
+                  "deck_title": "Professional Project Name",
+                  "tagline": "Provocative Value Prop",
+                  "slides": [
+                    { "slide_number": 1, "title": "Vision", "subtitle": "Executive summary of the project", "key_points": ["Strategic point A", "Strategic point B", "Strategic point C"], "speaker_notes": "Expert context for the presenter" },
+                    ... (generate all 12 slides corresponding to the standard startup framework)
+                  ]
+                }
+                [/INST]`;
+
+                try {
+                    console.log("Generating deck for:", payload.projectName);
+                    const startTime = Date.now();
+                    while (Date.now() - startTime < CONFIG.MAX_POLL_TIME) {
+                        const res = await fetch(CONFIG.HF_API_URL, {
+                            method: "POST", headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ inputs: prompt, parameters: { max_new_tokens: 3500, temperature: 0.7, return_full_text: false } })
+                        });
+                        if (res.status === 503) {
+                            UI.updateStatus("AI Engine warming up... (~30s)");
+                            await new Promise(r => setTimeout(r, CONFIG.POLL_INTERVAL));
+                            continue;
+                        }
+                        if (!res.ok) throw new Error();
+                        const result = await res.json();
+                        let text = result[0].generated_text;
+                        const jsonStart = text.indexOf('{');
+                        const jsonEnd = text.lastIndexOf('}');
+                        return JSON.parse(text.substring(jsonStart, jsonEnd + 1));
+                    }
+                } catch (e) {
+                    console.error("AI Generation Failed:", e);
+                    return this.fallback(payload);
+                }
+            }
+            static fallback(payload) {
+                const slides = QUESTIONS.map((q, i) => ({
+                    slide_number: i + 1, title: q.title, subtitle: payload.answers[q.id]?.substring(0, 50) || "Summary",
+                    key_points: (payload.answers[q.id] || "").split('.').slice(0, 3), speaker_notes: "Strategic pillar: " + q.id
+                }));
+                return { deck_title: payload.projectName, tagline: "Executive summary", slides };
+            }
+        }
+
+        class UI {
+            static init() { 
+                this.renderStep(0); 
+                this.setupListeners(); 
+                this.checkGDPR(); 
+            }
+            static setupListeners() {
+                // Interactive Background & Cursor
+                const cursor = document.getElementById('custom-cursor');
+                const bg = document.getElementById('bg-canvas');
+                
+                document.addEventListener('mousemove', (e) => {
+                    const x = e.clientX;
+                    const y = e.clientY;
+                    
+                    cursor.style.left = x + 'px';
+                    cursor.style.top = y + 'px';
+                    
+                    bg.style.setProperty('--mouse-x', (x / window.innerWidth * 100) + '%');
+                    bg.style.setProperty('--mouse-y', (y / window.innerHeight * 100) + '%');
+                    
+                    const isOverInteractable = e.target.closest('button, a, input, textarea');
+                    if (isOverInteractable) cursor.classList.add('active');
+                    else cursor.classList.remove('active');
+                });
+
+                document.getElementById('generate-final-btn').addEventListener('click', () => this.startGeneration());
+                document.getElementById('download-btn').addEventListener('click', () => {
+                    if (state.generatedDeck) DeckBuilder.export(state.generatedDeck);
+                    else alert("Please generate deck first.");
+                });
+                document.getElementById('restart-deck')?.addEventListener('click', () => location.reload());
+
+                window.addEventListener('scroll', () => {
+                    const header = document.getElementById('header');
+                    if (window.scrollY > 80) header.classList.add('scrolled');
+                    else header.classList.remove('scrolled');
+                });
+
+                document.querySelectorAll('a[href="#privacy"]').forEach(el => {
+                    el.addEventListener('click', (e) => { e.preventDefault(); this.togglePrivacy(true); });
+                });
+                
+                document.getElementById('accept-cookies').addEventListener('click', () => {
+                    localStorage.setItem('sinaida_gdpr_v1', 'accepted');
+                    document.getElementById('cookie-banner').classList.add('hidden');
+                });
+
+                document.getElementById('review-accordion').addEventListener('click', (e) => {
+                    e.currentTarget.classList.toggle('open');
+                    if (e.currentTarget.classList.contains('open')) {
+                        document.getElementById('review-list').innerHTML = QUESTIONS.map(q => `
+                            <div style="margin-bottom:12px; border-bottom:1px solid #eee; padding-bottom:8px;">
+                                <div style="font-size:11px;color:red;font-weight:700;">${q.num}. ${q.title}</div>
+                                <div style="font-size:14px;">${state.getAnswer(q.id)}</div>
+                            </div>`).join('');
+                    }
+                });
+            }
+            static togglePrivacy(open) {
+                document.getElementById('privacy-modal').classList.toggle('open', open);
+            }
+            static renderStep(idx) {
+                const q = QUESTIONS[idx];
+                document.getElementById('progress-container').classList.remove('hidden');
+                document.getElementById('step-count-text').innerText = `${q.num} / 12`;
+                document.getElementById('progress-fill').style.width = `${((idx + 1) / 12) * 100}%`;
+                document.getElementById('wizard-view').innerHTML = `
+                    <div class="step-card">
+                        <span class="step-num">${q.num}</span><h3 class="step-q">${q.title}</h3>
+                        <p class="step-guidance">${q.guideline}</p>
+                        <textarea id="q-input" autofocus>${state.getAnswer(q.id)}</textarea>
+                        <div class="char-counter"><span id="char-count">0</span> chars</div>
+                        <div class="wizard-nav">
+                            <button id="back-btn" class="back-btn" style="visibility:${idx === 0 ? 'hidden' : 'visible'}">← Back</button>
+                            <button id="next-btn" class="btn-primary">${idx === 11 ? 'Finish →' : 'Next →'}</button>
+                        </div>
+                    </div>`;
+                const area = document.getElementById('q-input');
+                area.addEventListener('input', (e) => { state.setAnswer(q.id, e.target.value); document.getElementById('char-count').innerText = e.target.value.length; });
+                document.getElementById('char-count').innerText = area.value.length;
+                document.getElementById('next-btn').addEventListener('click', () => { if (idx < 11) this.renderStep(idx + 1); else this.showConfirm(); });
+                document.getElementById('back-btn').addEventListener('click', () => this.renderStep(idx - 1));
+            }
+            static showConfirm() {
+                document.getElementById('wizard-view').classList.add('hidden');
+                document.getElementById('progress-container').classList.add('hidden');
+                document.getElementById('confirm-view').classList.remove('hidden');
+            }
+            static async startGeneration() {
+                state.projectName = document.getElementById('project-name').value;
+                if (!state.projectName) return alert("Project Name is required.");
+
+                // Validation
+                const gaps = QUESTIONS.filter(q => (state.answers[q.id]?.length || 0) < 40);
+                if (gaps.length > 0) {
+                    if (!confirm(`Your answers for "${gaps[0].title}" (and ${gaps.length - 1} others) are quite brief. For a high-quality deck, more detail is recommended. Proceed anyway?`)) {
+                        this.renderStep(QUESTIONS.indexOf(gaps[0]));
+                        return;
+                    }
+                }
+
+                document.getElementById('confirm-view').classList.add('hidden');
+                document.getElementById('loading-view').classList.remove('hidden');
+                state.generatedDeck = await APIClient.generate({ projectName: state.projectName, answers: state.answers });
+                this.showResults(state.generatedDeck);
+            }
+            static updateStatus(t) { document.getElementById('loading-status').innerText = t; }
+            static showResults(deck) {
+                document.getElementById('loading-view').classList.add('hidden');
+                document.getElementById('result-view').classList.remove('hidden');
+                document.getElementById('slide-preview').innerHTML = deck.slides.map(s => `
+                    <div class="slide-row"><div class="slide-row-num">${String(s.slide_number).padStart(2, '0')}</div>
+                    <div><div style="font-weight:700;">${s.title}</div><div style="font-size:13px;color:#666;">${s.subtitle}</div></div></div>`).join('');
+            }
+            static checkGDPR() { if (!localStorage.getItem('sinaida_gdpr_v1')) document.getElementById('cookie-banner').classList.remove('hidden'); }
+        }
+
+        class DeckBuilder {
+            static export(deck) {
+                if(!deck) return alert("No deck to export.");
+                const pptx = new PptxGenJS();
+                pptx.layout = 'LAYOUT_WIDE';
+                
+                // Define Theme Colors
+                const COLORS = {
+                    primary: "E30613",
+                    text: "000000",
+                    muted: "666666",
+                    bg: "FFFFFF",
+                    accent: "F5F5F5"
+                };
+
+                deck.slides.forEach((s, i) => {
+                    const slide = pptx.addSlide();
+                    
+                    // Background
+                    slide.background = { fill: COLORS.bg };
+
+                    // Global Elements
+                    slide.addShape(pptx.ShapeType.rect, { x: 0, y: 7.15, w: "100%", h: 0.35, fill: COLORS.accent });
+                    slide.addText("SINAIDA AI — STRATEGIC PITCH DECK", { x: 0.4, y: 7.23, fontSize: 8, color: COLORS.muted, bold: true });
+                    slide.addText(deck.deck_title.toUpperCase(), { x: 4.5, y: 7.23, w: 4, align: "center", fontSize: 8, color: COLORS.muted });
+                    slide.addText(`${s.slide_number} / 12`, { x: 12.3, y: 7.23, fontSize: 8, color: COLORS.primary, bold: true, align: "right" });
+
+                    if (i === 0) {
+                        // Title Slide
+                        slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 0.25, h: 7.5, fill: COLORS.primary });
+                        slide.addText(deck.deck_title.toUpperCase(), { 
+                            x: 0.75, y: 2.5, w: 11.5, fontSize: 84, bold: true, color: COLORS.text, fontFace: "Helvetica Neue" 
+                        });
+                        slide.addText(deck.tagline.toUpperCase(), { 
+                            x: 0.75, y: 4.2, w: 11.5, fontSize: 24, color: COLORS.muted, fontFace: "Helvetica Neue"
+                        });
+                    } else {
+                        // Content Slides
+                        slide.addShape(pptx.ShapeType.rect, { x: 0.4, y: 0.4, w: 0.8, h: 0.1, fill: COLORS.primary });
+                        slide.addText(s.title.toUpperCase(), { 
+                            x: 0.4, y: 0.7, w: 12, fontSize: 42, bold: true, color: COLORS.text, fontFace: "Helvetica Neue" 
+                        });
+                        
+                        // Left Column: Insight
+                        slide.addText(s.subtitle, { 
+                            x: 0.4, y: 2.2, w: 5.5, fontSize: 20, color: COLORS.muted, italic: true, lineSpacing: 1.2 
+                        });
+                        
+                        // Right Column: Key Points
+                        const points = s.key_points.map(p => ({ 
+                            text: p.trim(), 
+                            options: { bullet: { code: '2022' }, fontSize: 16, color: "333333", lineSpacing: 1.5 } 
+                        }));
+                        
+                        slide.addText(points, { 
+                            x: 6.8, y: 2.2, w: 6.0, h: 4.5, valign: "top"
+                        });
+                        
+                        // Divider
+                        slide.addShape(pptx.ShapeType.rect, { x: 6.4, y: 2.2, w: 0.01, h: 4.2, fill: "CCCCCC" });
+                        
+                        // Speaker Notes
+                        slide.notes = s.speaker_notes;
+                    }
+                });
+                
+                const fileName = `Sinaida_Deck_${deck.deck_title.replace(/\s+/g, '_')}_${Date.now()}.pptx`;
+                pptx.writeFile({ fileName });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { UI.init(); });
+    </script>
+</body>
+</html>
