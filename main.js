@@ -4,7 +4,11 @@ import PptxGenJS from 'pptxgenjs';
 const S = {
     ans: JSON.parse(sessionStorage.getItem('sn_a') || '{}'),
     projectName: '', presenterName: '', deck: null,
-    save() { sessionStorage.sconst Q = [
+    save() { sessionStorage.setItem('sn_a', JSON.stringify(this.ans)); }
+};
+
+// ── QUESTIONS ─────────────────────────────────────────────────────
+const Q = [
   { id:'problem', num:'01', slide:'Problem Statement',
     opener:"Every great project picks a fight with something broken.",
     title:"What are you going to war against?",
