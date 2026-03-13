@@ -1,4 +1,5 @@
 import PptxGenJS from 'pptxgenjs';
+import * as THREE from 'three';
 
 // ── STATE ─────────────────────────────────────────────────────────
 const S = {
@@ -158,9 +159,10 @@ document.addEventListener('mousemove', e => {
 document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
 document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
 
-// Hero is now the click target
-document.getElementById('hero').addEventListener('click', e => {
-    if (!e.target.closest('a,button')) document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
+// Hero button click target
+const heroCta = document.getElementById('hero-cta');
+if(heroCta) heroCta.addEventListener('click', e => {
+    document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
 });
 
 // ── HEADER ────────────────────────────────────────────────────────
@@ -459,7 +461,140 @@ function buildPPTX(deck, projectName, presenterName) {
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
+// ── THREE.JS SOLARIS OCEAN ────────────────────────────────────────
+function initThreeJs() {
+    const container = document.getElementById('hero-canvas');
+    if (!container) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.z = 40;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const particleCount = 12000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    const colors = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+
+    const radius = 16;
+    const colorInside = new THREE.Color('#E30613'); 
+    const colorOutside = new THREE.Color('#00E5FF'); 
+
+    for(let i = 0; i < particleCount; i++) {
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        
+        const r = radius + (Math.random() - 0.5) * 4;
+        
+        const x = r * Math.sin(phi) * Math.cos(theta);
+        const y = r * Math.sin(phi) * Math.sin(theta);
+        const z = r * Math.cos(phi);
+
+        positions[i*3] = x;
+        positions[i*3+1] = y;
+        positions[i*3+2] = z;
+
+        const mixRatio = (z + radius) / (radius * 2);
+        const finalColor = colorInside.clone().lerp(colorOutside, mixRatio);
+        
+        colors[i*3] = finalColor.r;
+        colors[i*3+1] = finalColor.g;
+        colors[i*3+2] = finalColor.b;
+        
+        sizes[i] = Math.random() * 0.15 + 0.05;
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    const material = new THREE.ShaderMaterial({
+        uniforms: {
+            time: { value: 0 },
+            mouse: { value: new THREE.Vector2(0, 0) }
+        },
+        vertexShader: `
+            uniform float time;
+            uniform vec2 mouse;
+            attribute float size;
+            attribute vec3 color;
+            varying vec3 vColor;
+            void main() {
+                vColor = color;
+                vec3 pos = position;
+                
+                pos.x += sin(time * 0.5 + pos.y * 0.2) * 1.5;
+                pos.y += cos(time * 0.3 + pos.z * 0.2) * 1.5;
+                pos.z += sin(time * 0.4 + pos.x * 0.2) * 1.5;
+                
+                float dist = distance(vec2(pos.x, pos.y), mouse * 20.0);
+                if(dist < 10.0) {
+                    pos.z += (10.0 - dist) * 0.5;
+                }
+                
+                vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                gl_PointSize = size * (300.0 / -mvPosition.z);
+                gl_Position = projectionMatrix * mvPosition;
+            }
+        `,
+        fragmentShader: `
+            varying vec3 vColor;
+            void main() {
+                vec2 center = gl_PointCoord - vec2(0.5);
+                float dist = length(center);
+                if(dist > 0.5) discard;
+                float alpha = smoothstep(0.5, 0.1, dist);
+                gl_FragColor = vec4(vColor, alpha * 0.8);
+            }
+        `,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending
+    });
+
+    const points = new THREE.Points(geometry, material);
+    scene.add(points);
+
+    let targetMouseX = 0, targetMouseY = 0;
+    document.addEventListener('mousemove', (e) => {
+        targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
+        targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+    });
+
+    const clock = new THREE.Clock();
+    let animId;
+
+    function animate() {
+        animId = requestAnimationFrame(animate);
+        const elapsedTime = clock.getElapsedTime();
+        
+        points.rotation.y = elapsedTime * 0.05;
+        points.rotation.x = elapsedTime * 0.03;
+        
+        material.uniforms.time.value = elapsedTime;
+        
+        material.uniforms.mouse.value.x += (targetMouseX - material.uniforms.mouse.value.x) * 0.05;
+        material.uniforms.mouse.value.y += (targetMouseY - material.uniforms.mouse.value.y) * 0.05;
+
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        if (!container) return;
+        camera.aspect = container.clientWidth / container.clientHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+}
+
 // ── INIT ──────────────────────────────────────────────────────────
 initCookie();
 renderStep(0);
 document.getElementById('prog-wrap').classList.remove('hidden');
+initThreeJs();

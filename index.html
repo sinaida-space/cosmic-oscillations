@@ -62,22 +62,23 @@
         .btn-hdr:hover { opacity:.82; }
 
         /* HERO */
-        .hero { min-height:100vh; display:flex; flex-direction:column; justify-content:center;
-            padding:calc(var(--hh) + 100px) 56px 100px; }
+        .hero { min-height:100vh; display:flex; align-items:center; justify-content:space-between;
+            padding:calc(var(--hh) + 60px) 56px 60px; position:relative; z-index:100; gap:40px; }
+        .hero-left { flex:0.9; max-width:680px; position:relative; pointer-events:auto; }
+        .hero-right { flex:1.1; height:600px; position:relative; pointer-events:none; display:flex; justify-content:center; align-items:center; }
+        .hero-right canvas { position:absolute; inset:0; z-index:-1; pointer-events:auto; }
         .eyebrow { font-size:11px; font-weight:600; letter-spacing:.38em; text-transform:uppercase;
             color:var(--red); margin-bottom:28px; display:block; }
-        .hero-h { font-size:clamp(52px,8.5vw,112px); font-weight:900; line-height:1.0;
-            letter-spacing:-.032em; margin-bottom:32px; max-width:880px; }
+        .hero-h { font-size:clamp(52px,7.5vw,94px); font-weight:900; line-height:1.0;
+            letter-spacing:-.032em; margin-bottom:32px; }
         .hero-h em { font-style:normal; color:var(--red); }
-        .hero-sub { font-size:18px; color:var(--dim); max-width:480px; line-height:1.75; margin-bottom:56px; }
+        .hero-sub { font-size:18px; color:var(--dim); max-width:480px; line-height:1.75; margin-bottom:48px; }
         .hero-cta { display:inline-flex; align-items:center; gap:12px;
-            background:var(--red); color:var(--white); font-size:14px; font-weight:700;
-            letter-spacing:.14em; text-transform:uppercase; padding:19px 52px; border:none;
-            transition:transform .3s,box-shadow .3s; }
+            background:var(--red); color:var(--white); font-size:13px; font-weight:700;
+            letter-spacing:.14em; text-transform:uppercase; padding:18px 42px; border:none;
+            transition:transform .3s,box-shadow .3s; pointer-events:auto; }
         .hero-cta:hover { transform:translateY(-2px); box-shadow:0 14px 44px rgba(227,6,19,.3); }
-        .hero-scroll { margin-top:80px; font-size:11px; letter-spacing:.22em; text-transform:uppercase;
-            color:var(--muted); display:flex; align-items:center; gap:14px; }
-        .hero-scroll::before { content:''; width:44px; height:1px; background:var(--muted); }
+        .hero-scroll { display:none; }
 
         /* SECTIONS */
         .section { padding:120px 56px; border-top:1px solid var(--border); }
@@ -247,10 +248,14 @@
 
 <main>
     <section class="hero" id="hero">
-        <span class="eyebrow">Project Thinking Studio</span>
-        <h1 class="hero-h">Your idea deserves<br>to be <em>understood.</em></h1>
-        <p class="hero-sub">Not just written down — structured, challenged, and made compelling. This is your thinking partner for any project.</p>
-        <div class="hero-scroll">Click anywhere to begin</div>
+        <div class="hero-left">
+            <span class="eyebrow">Project Thinking Studio</span>
+            <h1 class="hero-h">Your idea deserves<br>to be <em>understood.</em></h1>
+            <p class="hero-sub">Not just written down — structured, challenged, and made compelling. This is your thinking partner for any project.</p>
+            <button class="hero-cta" id="hero-cta">Start building →</button>
+        </div>
+        <div class="hero-right" id="hero-canvas">
+        </div>
     </section>
 
     <section class="section" id="how-it-works">
