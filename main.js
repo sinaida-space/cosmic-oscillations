@@ -130,21 +130,43 @@ function closeImprove() { improveEl.style.opacity = '0'; improveEl.style.pointer
 
 // ── CURSOR ────────────────────────────────────────────────────────
 const cursor = document.getElementById('cursor');
+const HERO_LABELS = ['Think →', 'Build →', 'Begin →', 'Start →'];
+let heroLabelIdx = 0;
+setInterval(() => {
+    heroLabelIdx = (heroLabelIdx + 1) % HERO_LABELS.length;
+    if (cursor.classList.contains('label')) cursor.textContent = HERO_LABELS[heroLabelIdx];
+}, 2200);
+
 document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
     document.getElementById('bg-layer').style.setProperty('--mx', (e.clientX / window.innerWidth * 100) + '%');
     document.getElementById('bg-layer').style.setProperty('--my', (e.clientY / window.innerHeight * 100) + '%');
-    cursor.classList.toggle('ring', !!(e.target.closest('a,button') && !e.target.closest('textarea,input')));
+    const hero = document.getElementById('hero');
+    const heroRect = hero.getBoundingClientRect();
+    const inHero = e.clientY >= heroRect.top && e.clientY <= heroRect.bottom && !e.target.closest('a,button');
+    if (inHero) {
+        cursor.classList.add('label');
+        cursor.classList.remove('ring');
+        cursor.textContent = HERO_LABELS[heroLabelIdx];
+    } else {
+        cursor.classList.remove('label');
+        cursor.textContent = '';
+        cursor.classList.toggle('ring', !!(e.target.closest('a,button') && !e.target.closest('textarea,input')));
+    }
 });
 document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
 document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
+
+// Hero is now the click target
+document.getElementById('hero').addEventListener('click', e => {
+    if (!e.target.closest('a,button')) document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
+});
 
 // ── HEADER ────────────────────────────────────────────────────────
 window.addEventListener('scroll', () => {
     document.getElementById('hdr').style.borderBottomColor = window.scrollY > 10 ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.06)';
 });
-document.getElementById('hdr-cta').onclick = () => document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
-document.getElementById('hero-cta').onclick = e => { e.preventDefault(); document.getElementById('generator').scrollIntoView({ behavior: 'smooth' }); };
 
 // ── COOKIE ────────────────────────────────────────────────────────
 function initCookie() { if (!localStorage.getItem('sn_c')) document.getElementById('cookie-banner').classList.remove('hidden'); }
