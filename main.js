@@ -91,8 +91,7 @@ const Q = [
     title:"How do the economics actually make sense? Where does the first dollar come from?",
     guidance:"Pricing model + price point + how customers discover and buy + rough unit economics + Year 1–3 projections with ONE key assumption stated explicitly. Simpler always wins.",
     placeholder:"e.g. SaaS: €29/mo individual / €99/mo team. Discovery: PLG via Figma plugin store. CAC ~€80, LTV ~€580 (20mo avg). Y1: €60k ARR. Y2: €240k. Key assumption: 3% free-to-paid conversion.",
-    chips:["Exact pricing model + price point?","How does the profoundly busy customer discover you?","How do they actually swipe their card?","Customer acquisition cost very rough estimate?","Lifetime value rough estimate?","When does the literal first revenue arrive?","Y1/Y2/Y3 realistic revenue targets?","The one massive key assumption behind the projections?"]
-    refine:"Four sections: (1) Pricing Model — model name + price point justified in one sentence. (2) Sales Model — how discovered and purchased. (3) Unit Economics — CAC, LTV, payback (estimates ok). (4) Revenue Forecast — Y1/2/3 with ONE stated key assumption. Source:"}gets?","The one key assumption behind projections?"],
+    chips:["Exact pricing model + price point?","How does the profoundly busy customer discover you?","How do they actually swipe their card?","Customer acquisition cost very rough estimate?","Lifetime value rough estimate?","When does the literal first revenue arrive?","Y1/Y2/Y3 realistic revenue targets?","The one massive key assumption behind the projections?"],
     refine:"Four sections: (1) Pricing Model — model name + price point justified in one sentence. (2) Sales Model — how discovered and purchased. (3) Unit Economics — CAC, LTV, payback (estimates ok). (4) Revenue Forecast — Y1/2/3 with ONE stated key assumption. Source:"}
 ];
 
