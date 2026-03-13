@@ -528,8 +528,10 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"></script>
-
+<script type="module">
+import PptxGenJS from '/node_modules/pptxgenjs/dist/pptxgen.es.js';
+window.__PptxGenJS = PptxGenJS;
+</script>
 <script>
 // ── CONFIG ──
 const HF_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2";
