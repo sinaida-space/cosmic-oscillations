@@ -282,7 +282,7 @@ Return ONLY valid JSON (no markdown, no preamble):
   ]
 }
 
-Generate exactly 13 slides. Arc: Cover → Problem Statement → Solution → Target Clients → Goal & Success Metrics → Scope Definition → Competitive Landscape → Progress & Findings → Team → Resources → Risk Assessment → Market Potential → Business Model. [/INST]`;
+Generate exactly 15 slides. Arc: Cover → Problem Statement → Solution → Target Clients → Goal & Success Metrics → Scope Definition → Competitive Landscape → Progress & Findings → Team → Resources → Risk Assessment → Market Potential → Business Model → Executive Summary → Thank You & Contacts. [/INST]`;
 
     const HF = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
     const deadline = Date.now() + 150000;
@@ -329,6 +329,28 @@ function fallback(st) {
         ],
         stat: 'AI-verified data = credible pitch'
     });
+    slides.push({
+        n: 14, title: 'Executive Summary',
+        headline: 'A one-page synthesis of the entire pitch',
+        insight: 'Copy the prompt below to generate a tight executive summary of your answers.',
+        points: [
+            `"Based on all my previous answers, write a single-slide Executive Summary for ${st.projectName}."`,
+            `"It should include: the core problem, our specific solution, the target market size, and our timeline or ask."`,
+            `"Keep it under 100 words total, using 4 bullet points."`
+        ],
+        stat: 'Cut to the chase'
+    });
+    slides.push({
+        n: 15, title: 'Thank You & Contacts',
+        headline: 'Ready to build together?',
+        insight: `Prepared by ${st.presenterName ? st.presenterName : 'the founding team'}. Reach out to discuss next steps.`,
+        points: [
+            '[Your Email Here]',
+            '[Your Phone / LinkedIn Here]',
+            '[Website or Demo Link Here]'
+        ],
+        stat: 'Let\'s talk'
+    });
     return { deck_title: st.projectName, tagline: '[Your one-line pitch — what this project does and for whom]', slides };
 }
 
@@ -372,7 +394,7 @@ function buildPPTX(deck, projectName, presenterName) {
             slide.addText(new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'}).toUpperCase(), { x:0.5, y:6.1, w:6, fontSize:9, color:'555555', fontFace:'Helvetica Neue' });
             slide.addText(`01 / ${total}`, { x:11.3, y:7.0, w:1.8, align:'right', fontSize:8, color:'444444', fontFace:'Helvetica Neue' });
 
-        } else if (num === total) {
+        } else if (s.title === 'Validate Your Assumptions') {
             // ── VALIDATE SLIDE ─────────────────────────────────────
             slide.background = { fill: C.black };
             slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:'100%', h:0.2, fill:C.red });
