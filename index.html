@@ -888,7 +888,9 @@ document.getElementById('restart-btn').onclick = () => {
 
 function exportPPTX(deck, projectName) {
     try {
-        const pptx = new PptxGenJS();
+        const Pptx = window.__PptxGenJS || window.PptxGenJS;
+        if (!Pptx) { alert('Slide builder not loaded yet. Please wait a moment and try again.'); return; }
+        const pptx = new Pptx();
         pptx.layout = 'LAYOUT_WIDE';
 
         const C = { red: 'E30613', black: '000000', white: 'FFFFFF', muted: '666666', light: 'F4F4F4', divider: 'DDDDDD' };
