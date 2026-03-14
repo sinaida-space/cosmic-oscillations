@@ -235,6 +235,11 @@
             .footer-bottom { flex-direction:column; gap:16px; text-align:center; }
             #cookie-banner { flex-direction:column; padding:18px 24px; }
         }
+
+        /* Prevent custom cursor on touch devices */
+        @media (hover: none) and (pointer: coarse) {
+            #cursor { display: none !important; }
+        }
     </style>
 </head>
 <body>
