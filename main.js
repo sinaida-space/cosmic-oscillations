@@ -1,5 +1,5 @@
-import PptxGenJS from 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.es.js';
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import PptxGenJS from 'pptxgenjs';
+import * as THREE from 'three';
 
 // ── STATE ─────────────────────────────────────────────────────────
 const S = {
