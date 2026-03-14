@@ -1,5 +1,9 @@
 import PptxGenJS from 'pptxgenjs';
 import * as THREE from 'three';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
 // ── STATE ─────────────────────────────────────────────────────────
 const S = {
@@ -12,7 +16,7 @@ const S = {
 const Q = [
   { id:'problem', num:'01', slide:'Problem Statement',
     opener:"Every great project picks a fight with something broken.",
-    title:"What are you going to war against?",
+    title:"What opportunities for improvement do you see, and what makes you say that?",
     guidance:"Name the specific pain point and who experiences it daily. Make it feel urgent and provable — not a vague observation but a daily frustration.",
     placeholder:"e.g. Product managers spend 6h/week manually consolidating feedback from 4+ tools into one report. It's error-prone and soul-crushing, but nobody questions it anymore.",
     chips:["Who is the main victim here?","What evidence proves it's real?","What happens if no one steps in?","Why is it urgent right now?","How often does this occur?","What does inaction cost in time or money?","Is this your personal pain too?","Why is everyone accepting this as normal?"],
@@ -473,7 +477,17 @@ function initThreeJs() {
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.toneMapping = THREE.ReinhardToneMapping;
     container.appendChild(renderer.domElement);
+
+    const renderScene = new RenderPass(scene, camera);
+    const bloomPass = new UnrealBloomPass(new THREE.Vector2(container.clientWidth, container.clientHeight), 0.6, 0.4, 0.85);
+    const outputPass = new OutputPass();
+
+    const composer = new EffectComposer(renderer);
+    composer.addPass(renderScene);
+    composer.addPass(bloomPass);
+    composer.addPass(outputPass);
 
     const particleCount = 12000;
     const geometry = new THREE.BufferGeometry();
@@ -506,7 +520,8 @@ function initThreeJs() {
         colors[i*3+1] = finalColor.g;
         colors[i*3+2] = finalColor.b;
         
-        sizes[i] = Math.random() * 0.15 + 0.05;
+        // Increase base size slightly so bloom is more pronounced
+        sizes[i] = Math.random() * 0.18 + 0.08;
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -549,7 +564,8 @@ function initThreeJs() {
                 float dist = length(center);
                 if(dist > 0.5) discard;
                 float alpha = smoothstep(0.5, 0.1, dist);
-                gl_FragColor = vec4(vColor, alpha * 0.8);
+                // Boost color output for stronger bloom interaction
+                gl_FragColor = vec4(vColor * 1.5, alpha * 0.8);
             }
         `,
         transparent: true,
@@ -561,10 +577,22 @@ function initThreeJs() {
     scene.add(points);
 
     let targetMouseX = 0, targetMouseY = 0;
+    let isMouseOver = false;
+
     document.addEventListener('mousemove', (e) => {
         targetMouseX = (e.clientX / window.innerWidth) * 2 - 1;
         targetMouseY = -(e.clientY / window.innerHeight) * 2 + 1;
+        
+        const rect = container.getBoundingClientRect();
+        isMouseOver = (e.clientX >= rect.left && e.clientX <= rect.right && e.clientY >= rect.top && e.clientY <= rect.bottom);
     });
+
+    let scrollSpeed = 0;
+    let lastScrollY = window.scrollY;
+    document.addEventListener('scroll', () => {
+        scrollSpeed = Math.abs(window.scrollY - lastScrollY);
+        lastScrollY = window.scrollY;
+    }, { passive: true });
 
     const clock = new THREE.Clock();
     let animId;
@@ -581,7 +609,16 @@ function initThreeJs() {
         material.uniforms.mouse.value.x += (targetMouseX - material.uniforms.mouse.value.x) * 0.05;
         material.uniforms.mouse.value.y += (targetMouseY - material.uniforms.mouse.value.y) * 0.05;
 
-        renderer.render(scene, camera);
+        // Dynamic bloom logic
+        scrollSpeed *= 0.95; // exponential decay
+        let targetBloom = 0.5; // low base bloom
+        if (isMouseOver) targetBloom += 1.2; // increase heavily on hover
+        targetBloom += Math.min(scrollSpeed * 0.04, 1.5); // increase on movement
+
+        // Smoothly interpolate current bloom strength to target
+        bloomPass.strength += (targetBloom - bloomPass.strength) * 0.08;
+
+        composer.render();
     }
     animate();
 
@@ -590,6 +627,7 @@ function initThreeJs() {
         camera.aspect = container.clientWidth / container.clientHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(container.clientWidth, container.clientHeight);
+        composer.setSize(container.clientWidth, container.clientHeight);
     });
 }
 
