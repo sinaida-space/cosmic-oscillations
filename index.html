@@ -133,7 +133,7 @@
         .btn-next:active { transform:translateY(1px) scale(0.96); box-shadow:0 4px 14px rgba(227,6,19,.2); }
 
         /* CONFIRM */
-        .conf-wrap { max-width:580px; margin:0 auto; padding:80px 56px 120px; }
+        .conf-wrap { max-width:580px; padding:0; }
         .conf-wrap h2 { font-size:38px; font-weight:800; letter-spacing:-.022em; margin-bottom:6px; }
         .conf-sub { font-size:15px; color:var(--muted); margin-bottom:44px; }
         .field { margin-bottom:20px; }
@@ -157,7 +157,7 @@
         .btn-gen:active { transform:translateY(1px) scale(0.98); box-shadow:0 4px 14px rgba(227,6,19,.2); }
 
         /* LOADING */
-        .load-wrap { padding:140px 56px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:44px; }
+        .load-wrap { padding:100px 0; text-align:left; display:flex; flex-direction:column; align-items:flex-start; gap:44px; }
         .orbs { position:relative; width:110px; height:110px; }
         .orb { position:absolute; border-radius:50%; animation:orb 2.4s linear infinite; }
         .o1 { width:16px; height:16px; background:var(--red); top:0; left:50%; margin-left:-8px; }
@@ -169,7 +169,7 @@
         #load-sub { font-size:14px; color:var(--muted); margin-top:8px; }
 
         /* RESULTS */
-        .res-wrap { max-width:680px; margin:0 auto; padding:80px 56px 120px; }
+        .res-wrap { max-width:680px; padding:0; }
         .res-wrap h2 { font-size:38px; font-weight:800; letter-spacing:-.022em; margin-bottom:6px; }
         .res-sub { font-size:15px; color:var(--muted); margin-bottom:44px; }
         .slide-list { border:1px solid var(--border); }
@@ -182,7 +182,7 @@
         .btn-dl { width:100%; height:60px; margin-top:44px; font-size:14px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; background:var(--white); color:var(--black); border:none; transition:opacity .2s, transform .2s cubic-bezier(0.2, 0, 0, 1); }
         .btn-dl:hover { opacity:.86; transform:scale(1.02); }
         .btn-dl:active { transform:scale(0.98); }
-        .btn-restart { display:block; margin:22px auto 0; background:none; border:none; font-size:13px; font-weight:600; color:var(--red); letter-spacing:.1em; text-transform:uppercase; transition:transform .2s cubic-bezier(0.2, 0, 0, 1); }
+        .btn-restart { display:block; margin:22px 0 0; background:none; border:none; font-size:13px; font-weight:600; color:var(--red); letter-spacing:.1em; text-transform:uppercase; transition:transform .2s cubic-bezier(0.2, 0, 0, 1); }
         .btn-restart:hover { transform:translateY(-1px) scale(1.02); }
         .btn-restart:active { transform:translateY(1px) scale(0.96); }
 
@@ -292,15 +292,16 @@
         </div>
     </section>
 
-    <section id="generator">
+    <section class="section" id="generator">
+        <span class="section-label">Generator</span>
         <div id="prog-wrap" class="prog-wrap hidden">
             <div class="prog-meta">
                 <span class="prog-label">Building your narrative</span>
                 <span class="prog-count" id="prog-count">01 / 12</span>
             </div>
-            <div class="prog-track"><div id="prog-fill" class="prog-fill" style="width:8.33%"></div></div>
+            <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
         </div>
-        <div id="wizard-view" class="wiz-wrap"></div>
+        <div id="wizard-view" class="wiz-wrap hidden"></div>
         <div id="confirm-view" class="conf-wrap hidden">
             <h2>One last thing.</h2>
             <p class="conf-sub">What do you want to call this project?</p>
