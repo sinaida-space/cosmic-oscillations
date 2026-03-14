@@ -204,10 +204,24 @@ document.querySelectorAll('.fp-legal-link').forEach(a => a.onclick = openModal);
 document.getElementById('modal-close').onclick = () => modal.classList.remove('open');
 modal.onclick = e => { if (e.target === modal) modal.classList.remove('open'); };
 
+// ── REVEAL OBSERVER ────────────────────────────────────────────────
+const revealCallback = (entries, obs) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('reveal-active');
+            if (entry.target.classList.contains('p-card')) obs.unobserve(entry.target);
+        }
+    });
+};
+const revealObs = new IntersectionObserver(revealCallback, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
 // ── VIEWS ─────────────────────────────────────────────────────────
 function show(id) {
     ['wizard-view','confirm-view','loading-view','result-view'].forEach(v => document.getElementById(v).classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
+    const target = document.getElementById(id);
+    target.classList.remove('hidden');
+    target.classList.add('reveal-active');
 }
 
 // ── WIZARD ────────────────────────────────────────────────────────
@@ -238,7 +252,7 @@ function renderStep(idx) {
                 </div>
                 <div class="wiz-nav" style="margin-top:64px; display:flex; gap:20px;">
                     <button class="btn-back" id="btn-back" style="visibility:${idx===0?'hidden':'visible'}; background:none; border:1px solid var(--border); color:var(--dim); padding:18px 32px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em;">Back</button>
-                    <button class="btn-next" id="btn-next" style="background:var(--white); color:var(--black); border:none; padding:18px 48px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; flex:1;">${idx===11?'Review structure →':'Continue →'}</button>
+                    <button class="btn-next" id="btn-next" style="background:var(--teal); color:var(--black); border:none; padding:18px 48px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; flex:1; transition:all .3s;">${idx===11?'Review structure →':'Continue →'}</button>
                 </div>
             </div>
         </div>`;
