@@ -327,24 +327,59 @@
         <div id="wizard-view" class="wiz-wrap"></div>
 
         <div id="confirm-view" class="conf-wrap hidden">
-            <h2>One last thing.</h2>
-            <p class="conf-sub">What do you want to call this project?</p>
-            <div class="field"><label>Project name <span style="color:var(--red)">*</span></label><input type="text" id="proj-name" placeholder="e.g. Project Iris"></div>
-            <div class="field"><label>Your name</label><input type="text" id="pres-name" placeholder="e.g. Sinaida K."></div>
-            <div class="ans-toggle" id="ans-toggle"><span>Review your answers</span><span id="ans-arrow">↓</span></div>
-            <div class="ans-list" id="ans-list"></div>
-            <button class="btn-gen" id="btn-gen">Generate my deck →</button>
+            <div class="m-grid">
+                <div class="m-col-sidebar">
+                    <div class="m-side-meta">
+                        <span class="q-label">Ready</span>
+                        <span class="q-section-name">Confirmation</span>
+                    </div>
+                </div>
+                <div class="m-col-main">
+                    <h2 class="q-title">One last thing.</h2>
+                    <p class="q-guidance">What do you want to call this project? This will appear on the title slide.</p>
+                    <div class="field"><label>Project name <span style="color:var(--red)">*</span></label><input type="text" id="proj-name" placeholder="e.g. Project Iris"></div>
+                    <div class="field"><label>Your name</label><input type="text" id="pres-name" placeholder="e.g. Sinaida K."></div>
+                    <div class="ans-toggle" id="ans-toggle"><span>Review your answers</span><span id="ans-arrow">↓</span></div>
+                    <div class="ans-list" id="ans-list"></div>
+                    <button class="btn-gen" id="btn-gen">Generate my deck →</button>
+                </div>
+            </div>
         </div>
+
         <div id="loading-view" class="load-wrap hidden">
-            <div class="orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb-c"></div></div>
-            <div><p id="load-phrase">Reading between the lines...</p><p id="load-sub">Building your narrative structure.</p></div>
+            <div class="m-grid">
+                <div class="m-col-sidebar">
+                    <div class="m-side-meta">
+                        <span class="q-label">Working</span>
+                        <span class="q-section-name">Synthesis</span>
+                    </div>
+                </div>
+                <div class="m-col-main">
+                    <div class="orbs"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="orb-c"></div></div>
+                    <div style="margin-top:64px">
+                        <p id="load-phrase" style="font-size:24px; font-weight:800; letter-spacing:-0.02em; margin-bottom:8px;">Reading between the lines...</p>
+                        <p id="load-sub" style="font-size:16px; color:var(--muted);">Building your narrative structure.</p>
+                    </div>
+                </div>
+            </div>
         </div>
+
         <div id="result-view" class="res-wrap hidden">
-            <h2>Your deck is ready.</h2>
-            <p class="res-sub">Here's your narrative arc — 12 slides + 1 verification guide.</p>
-            <div class="slide-list" id="slide-preview"></div>
-            <button class="btn-dl" id="btn-dl">Download PPTX →</button>
-            <button class="btn-restart" id="btn-restart">Start a new project</button>
+            <div class="m-grid">
+                <div class="m-col-sidebar">
+                    <div class="m-side-meta">
+                        <span class="q-label">Complete</span>
+                        <span class="q-section-name">Download</span>
+                    </div>
+                </div>
+                <div class="m-col-main">
+                    <h2 class="q-title">Your deck is ready.</h2>
+                    <p class="q-guidance">Here's your narrative arc — 12 slides + 1 verification guide.</p>
+                    <div class="slide-list" id="slide-preview"></div>
+                    <button class="btn-dl" id="btn-dl">Download PPTX →</button>
+                    <button class="btn-restart" id="btn-restart">Start a new project</button>
+                </div>
+            </div>
         </div>
     </section>
 </main>
