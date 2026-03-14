@@ -130,33 +130,54 @@ function closeImprove() { improveEl.style.opacity = '0'; improveEl.style.pointer
 
 // ── CURSOR ────────────────────────────────────────────────────────
 const cursor = document.getElementById('cursor');
-const HERO_LABELS = ['Think →', 'Build →', 'Begin →', 'Start →'];
-let heroLabelIdx = 0;
-setInterval(() => {
-    heroLabelIdx = (heroLabelIdx + 1) % HERO_LABELS.length;
-    if (cursor.classList.contains('label')) cursor.textContent = HERO_LABELS[heroLabelIdx];
-}, 2200);
+if (cursor) {
+    const HERO_LABELS = ['Think →', 'Build →', 'Begin →', 'Start →'];
+    let heroLabelIdx = 0;
+    setInterval(() => {
+        heroLabelIdx = (heroLabelIdx + 1) % HERO_LABELS.length;
+        if (cursor.classList.contains('label')) cursor.textContent = HERO_LABELS[heroLabelIdx];
+    }, 2200);
 
-document.addEventListener('mousemove', e => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-    document.getElementById('bg-layer').style.setProperty('--mx', (e.clientX / window.innerWidth * 100) + '%');
-    document.getElementById('bg-layer').style.setProperty('--my', (e.clientY / window.innerHeight * 100) + '%');
-    const hero = document.getElementById('hero');
-    const heroRect = hero.getBoundingClientRect();
-    const inHero = e.clientY >= heroRect.top && e.clientY <= heroRect.bottom && !e.target.closest('a,button');
-    if (inHero) {
-        cursor.classList.add('label');
-        cursor.classList.remove('ring');
-        cursor.textContent = HERO_LABELS[heroLabelIdx];
-    } else {
-        cursor.classList.remove('label');
-        cursor.textContent = '';
-        cursor.classList.toggle('ring', !!(e.target.closest('a,button') && !e.target.closest('textarea,input')));
-    }
-});
-document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
-document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
+    // Initial state
+    cursor.style.opacity = '0';
+
+    document.addEventListener('mousemove', e => {
+        cursor.style.opacity = '1';
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+        
+        const bgl = document.getElementById('bg-layer');
+        if (bgl) {
+            bgl.style.setProperty('--mx', (e.clientX / window.innerWidth * 100) + '%');
+            bgl.style.setProperty('--my', (e.clientY / window.innerHeight * 100) + '%');
+        }
+
+        const hero = document.getElementById('hero');
+        if (hero) {
+            const heroRect = hero.getBoundingClientRect();
+            const overInteractive = e.target.closest('a,button,textarea,input,.q-chip');
+            const inHero = e.clientY >= heroRect.top && e.clientY <= heroRect.bottom && !overInteractive;
+            
+            if (inHero) {
+                cursor.classList.add('label');
+                cursor.classList.remove('ring');
+                cursor.textContent = HERO_LABELS[heroLabelIdx];
+            } else {
+                cursor.classList.remove('label');
+                cursor.textContent = '';
+                // Only show ring for links and buttons, hide cursor entirely for inputs to show system I-beam
+                const isBtn = e.target.closest('a,button,.q-chip');
+                const isInput = e.target.closest('textarea,input');
+                
+                cursor.classList.toggle('ring', !!isBtn);
+                cursor.style.opacity = isInput ? '0' : '1';
+            }
+        }
+    });
+
+    document.addEventListener('mouseleave', () => cursor.style.opacity = '0');
+    document.addEventListener('mouseenter', () => cursor.style.opacity = '1');
+}
 
 // Hero button click target
 const heroCta = document.getElementById('hero-cta');
