@@ -3,7 +3,8 @@ import PptxGenJS from 'pptxgenjs';
 // ── STATE ─────────────────────────────────────────────────────────
 const S = {
     ans: JSON.parse(sessionStorage.getItem('sn_a') || '{}'),
-    projectName: '', presenterName: '', deck: null,
+    projectName: 'Structurizer Project',
+    presenterName: '', deck: null,
     save() { sessionStorage.setItem('sn_a', JSON.stringify(this.ans)); }
 };
 
