@@ -218,19 +218,28 @@ function renderStep(idx) {
     const wv = document.getElementById('wizard-view');
     wv.classList.remove('hidden');
     wv.innerHTML = `
-        <span class="q-label">${q.num} / 12 — ${q.slide}</span>
-        <p class="q-opener">${q.opener}</p>
-        <h2 class="q-title">${q.title}</h2>
-        <p class="q-guidance">${q.guidance}</p>
-        <div class="chips">${q.chips.map(c => `<span class="q-chip" data-chip="${c.replace(/"/g,'&quot;')}">${c}</span>`).join('')}</div>
-        <textarea id="q-ta" placeholder="${q.placeholder}">${S.ans[q.id] || ''}</textarea>
-        <div class="char-meta" style="justify-content:space-between">
-            <button id="btn-improve" style="font-size:12px;font-weight:600;background:none;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);padding:6px 16px;letter-spacing:.1em;text-transform:uppercase;transition:all .2s">✦ Refine this answer</button>
-            <span><span id="char-n">${(S.ans[q.id]||'').length}</span> chars</span>
-        </div>
-        <div class="wiz-nav">
-            <button class="btn-back" id="btn-back" style="visibility:${idx===0?'hidden':'visible'}">← Back</button>
-            <button class="btn-next" id="btn-next">${idx===11?'Review →':'Continue →'}</button>
+        <div class="m-grid">
+            <div class="m-col-sidebar">
+                <div class="m-side-meta">
+                    <span class="q-label">${q.num} / 12</span>
+                    <span class="q-section-name">${q.slide}</span>
+                </div>
+            </div>
+            <div class="m-col-main">
+                <p class="q-opener">${q.opener}</p>
+                <h2 class="q-title">${q.title}</h2>
+                <p class="q-guidance">${q.guidance}</p>
+                <div class="chips">${q.chips.map(c => `<span class="q-chip" data-chip="${c.replace(/"/g,'&quot;')}">${c}</span>`).join('')}</div>
+                <textarea id="q-ta" placeholder="${q.placeholder}">${S.ans[q.id] || ''}</textarea>
+                <div class="char-meta">
+                    <button class="btn-improve" id="btn-improve">✦ Refine this answer</button>
+                    <span><span id="char-n">${(S.ans[q.id]||'').length}</span> characters</span>
+                </div>
+                <div class="wiz-nav">
+                    <button class="btn-back" id="btn-back" style="visibility:${idx===0?'hidden':'visible'}">← Back</button>
+                    <button class="btn-next" id="btn-next">${idx===11?'Review →':'Continue →'}</button>
+                </div>
+            </div>
         </div>`;
     const ta = document.getElementById('q-ta');
     wv.querySelectorAll('.q-chip').forEach(chip => {
