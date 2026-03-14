@@ -228,17 +228,17 @@ function renderStep(idx) {
             </div>
             <div class="m-col-main">
                 <p class="q-opener">${q.opener}</p>
-                <h2 class="q-title" style="font-family:var(--font-serif); font-size:clamp(42px,5vw,72px); font-weight:400; font-style:italic; line-height:1.0; margin-bottom:48px;">${q.title}</h2>
-                <p class="q-guidance" style="font-size:18px; line-height:1.7; color:var(--dim); margin-bottom:48px; max-width:640px;">${q.guidance}</p>
+                <h2 class="q-title" style="font-family:var(--font-serif); font-size:clamp(42px,5vw,72px); font-weight:400; line-height:1.0; margin-bottom:48px;">${q.title}</h2>
+                <p class="q-guidance" style="font-family:var(--font-sans); font-size:18px; line-height:1.7; color:var(--dim); margin-bottom:48px; max-width:640px;">${q.guidance}</p>
                 <div class="chips">${q.chips.map(c => `<span class="q-chip" data-chip="${c.replace(/"/g,'&quot;')}">${c}</span>`).join('')}</div>
                 <textarea id="q-ta" placeholder="${q.placeholder}" style="width:100%; height:200px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:12px; padding:24px; color:var(--white); font-family:var(--font-sans); font-size:16px; line-height:1.6; resize:none; outline:none; transition:border-color .3s;"></textarea>
                 <div class="char-meta" style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); font-weight:700; letter-spacing:0.05em;">
-                    <button class="btn-improve" id="btn-improve" style="background:none; border:none; color:var(--red); text-transform:uppercase; letter-spacing:0.1em; font-weight:700;">✦ Refine this answer</button>
+                    <button class="btn-improve" id="btn-improve" style="background:none; border:none; color:var(--teal); text-transform:uppercase; letter-spacing:0.1em; font-weight:700;">✦ Refine this answer</button>
                     <span><span id="char-n">${(S.ans[q.id]||'').length}</span> characters</span>
                 </div>
                 <div class="wiz-nav" style="margin-top:64px; display:flex; gap:20px;">
                     <button class="btn-back" id="btn-back" style="visibility:${idx===0?'hidden':'visible'}; background:none; border:1px solid var(--border); color:var(--dim); padding:18px 32px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em;">Back</button>
-                    <button class="btn-next" id="btn-next" style="background:var(--white); color:var(--black); border:none; padding:18px 48px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; flex:1;">${idx===11?'Review narrative →':'Continue →'}</button>
+                    <button class="btn-next" id="btn-next" style="background:var(--white); color:var(--black); border:none; padding:18px 48px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; flex:1;">${idx===11?'Review structure →':'Continue →'}</button>
                 </div>
             </div>
         </div>`;
@@ -383,7 +383,7 @@ function fallback(st) {
         ],
         stat: 'Let\'s talk'
     });
-    return { deck_title: st.projectName, tagline: '[Your one-line pitch — what this project does and for whom]', slides };
+    return { deck_title: st.projectName, tagline: '[Your one-line structure — what this project does and for whom]', slides };
 }
 
 // ── RESULTS ───────────────────────────────────────────────────────
@@ -391,10 +391,10 @@ function showResults(deck) {
     show('result-view');
     document.getElementById('slide-preview').innerHTML = deck.slides.map((s, i) => `
         <div class="slide-row" style="background:rgba(255,255,255,0.01); border:1px solid var(--border); border-radius:8px; margin-bottom:12px; padding:32px; display:flex; gap:32px; align-items:center;">
-            <div class="slide-num" style="font-family:var(--font-serif); font-size:32px; color:var(--red); font-style:italic; border-right:1px solid var(--border); padding-right:32px; min-width:80px; text-align:center;">${String(s.n || i+1).padStart(2,'0')}</div>
+            <div class="slide-num" style="font-family:var(--font-serif); font-size:32px; color:var(--teal); border-right:1px solid var(--border); padding-right:32px; min-width:80px; text-align:center;">${String(s.n || i+1).padStart(2,'0')}</div>
             <div style="flex:1">
                 <div class="slide-title" style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.2em; color:var(--muted); margin-bottom:8px;">${s.title}</div>
-                <div class="slide-sub" style="font-family:var(--font-serif); font-size:24px; font-style:italic; line-height:1.2; color:var(--white);">${s.headline || s.insight || ''}</div>
+                <div class="slide-sub" style="font-family:var(--font-serif); font-size:24px; line-height:1.2; color:var(--white);">${s.headline || s.insight || ''}</div>
             </div>
         </div>`).join('');
 }
@@ -406,7 +406,7 @@ document.getElementById('btn-restart').onclick = () => { sessionStorage.removeIt
 function buildPPTX(deck, projectName, presenterName) {
     const pptx = new PptxGenJS();
     pptx.layout = 'LAYOUT_WIDE'; // 13.33 × 7.5 in
-    const C = { black:'0A0A0A', white:'FFFFFF', red:'E30613', gray:'666666', lgray:'E8E8E8', mgray:'BBBBBB', offblack:'1A1A1A' };
+    const C = { black:'0A0A0A', white:'FFFFFF', teal:'00F5FF', gray:'666666', lgray:'E8E8E8', mgray:'BBBBBB', offblack:'1A1A1A' };
 
     deck.slides.forEach((s, idx) => {
         const slide = pptx.addSlide();
@@ -416,11 +416,11 @@ function buildPPTX(deck, projectName, presenterName) {
         if (idx === 0) {
             // ── COVER ──────────────────────────────────────────────
             slide.background = { fill: C.black };
-            slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:0.2, h:'100%', fill:C.red });
+            slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:0.2, h:'100%', fill:C.teal });
             slide.addText((deck.deck_title || projectName).toUpperCase(), {
                 x:0.5, y:1.7, w:12, fontSize:56, bold:true, color:C.white, fontFace:'Helvetica Neue', charSpacing:-1 });
-            slide.addShape(pptx.ShapeType.rect, { x:0.5, y:3.5, w:3.2, h:0.06, fill:C.red });
-            slide.addText(deck.tagline || '[One-line pitch]', {
+            slide.addShape(pptx.ShapeType.rect, { x:0.5, y:3.5, w:3.2, h:0.06, fill:C.teal });
+            slide.addText(deck.tagline || '[One-line structure]', {
                 x:0.5, y:3.7, w:9.5, fontSize:20, color:'999999', fontFace:'Helvetica Neue', italic:true });
             if (presenterName) slide.addText(presenterName.toUpperCase(), { x:0.5, y:5.7, w:6, fontSize:10, color:C.gray, fontFace:'Helvetica Neue', bold:true, charSpacing:2.5 });
             slide.addText(new Date().toLocaleDateString('en-GB',{month:'long',year:'numeric'}).toUpperCase(), { x:0.5, y:6.1, w:6, fontSize:9, color:'555555', fontFace:'Helvetica Neue' });
@@ -429,15 +429,15 @@ function buildPPTX(deck, projectName, presenterName) {
         } else if (s.title === 'Validate Your Assumptions') {
             // ── VALIDATE SLIDE ─────────────────────────────────────
             slide.background = { fill: C.black };
-            slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:'100%', h:0.2, fill:C.red });
-            slide.addText('VALIDATE YOUR ASSUMPTIONS', { x:0.5, y:0.38, w:12, fontSize:10, bold:true, color:C.red, fontFace:'Helvetica Neue', charSpacing:3 });
+            slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:'100%', h:0.2, fill:C.teal });
+            slide.addText('VALIDATE YOUR ASSUMPTIONS', { x:0.5, y:0.38, w:12, fontSize:10, bold:true, color:C.teal, fontFace:'Helvetica Neue', charSpacing:3 });
             slide.addText(s.headline || s.title, { x:0.5, y:0.72, w:12, fontSize:32, bold:true, color:C.white, fontFace:'Helvetica Neue', charSpacing:-0.5 });
             slide.addText(s.insight || '', { x:0.5, y:1.55, w:12, fontSize:14, color:'888888', fontFace:'Helvetica Neue', italic:true });
             slide.addShape(pptx.ShapeType.rect, { x:0.5, y:2.0, w:12.3, h:0.008, fill:'2A2A2A' });
             (s.points||[]).slice(0,5).forEach((pt, pi) => {
                 const y = 2.2 + pi * 0.95;
-                slide.addShape(pptx.ShapeType.rect, { x:0.5, y, w:0.05, h:0.55, fill:C.red });
-                slide.addText(`PROMPT ${pi+1}`, { x:0.7, y, w:1.5, fontSize:8, bold:true, color:C.red, fontFace:'Helvetica Neue', charSpacing:2 });
+                slide.addShape(pptx.ShapeType.rect, { x:0.5, y, w:0.05, h:0.55, fill:C.teal });
+                slide.addText(`PROMPT ${pi+1}`, { x:0.7, y, w:1.5, fontSize:8, bold:true, color:C.teal, fontFace:'Helvetica Neue', charSpacing:2 });
                 slide.addText(pt, { x:0.7, y:y+0.2, w:12.1, fontSize:11.5, color:'CCCCCC', fontFace:'Helvetica Neue', lineSpacingMultiple:1.35 });
             });
             slide.addText(`${String(num).padStart(2,'0')} / ${total}`, { x:11.3, y:7.0, w:1.8, align:'right', fontSize:8, color:'444444' });
@@ -446,9 +446,9 @@ function buildPPTX(deck, projectName, presenterName) {
             // ── CONTENT SLIDES — Swiss grid ────────────────────────
             slide.background = { fill: C.white };
             // Red rule top
-            slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:'100%', h:0.15, fill:C.red });
+            slide.addShape(pptx.ShapeType.rect, { x:0, y:0, w:'100%', h:0.15, fill:C.teal });
             // Slide number
-            slide.addText(String(num).padStart(2,'0'), { x:0.44, y:0.28, w:0.7, fontSize:10, bold:true, color:C.red, fontFace:'Helvetica Neue' });
+            slide.addText(String(num).padStart(2,'0'), { x:0.44, y:0.28, w:0.7, fontSize:10, bold:true, color:C.teal, fontFace:'Helvetica Neue' });
             // Slide name label
             slide.addText((s.title||'').toUpperCase(), { x:1.1, y:0.28, w:10, fontSize:10, bold:true, color:'AAAAAA', fontFace:'Helvetica Neue', charSpacing:1.5 });
             // Main headline — large and specific
@@ -458,7 +458,7 @@ function buildPPTX(deck, projectName, presenterName) {
             // Horizontal rule
             slide.addShape(pptx.ShapeType.rect, { x:0.44, y:1.6, w:12.3, h:0.01, fill:C.lgray });
             // LEFT COLUMN — Core Insight
-            slide.addText('CORE INSIGHT', { x:0.44, y:1.74, w:5.6, fontSize:8, bold:true, color:C.red, fontFace:'Helvetica Neue', charSpacing:2.5 });
+            slide.addText('CORE INSIGHT', { x:0.44, y:1.74, w:5.6, fontSize:8, bold:true, color:C.teal, fontFace:'Helvetica Neue', charSpacing:2.5 });
             slide.addText(s.insight || '[Core insight for this slide]', {
                 x:0.44, y:2.06, w:5.4, fontSize:17, color:C.black,
                 fontFace:'Helvetica Neue', lineSpacingMultiple:1.55, italic:true });
@@ -473,7 +473,7 @@ function buildPPTX(deck, projectName, presenterName) {
             slide.addText('KEY POINTS', { x:6.4, y:1.74, w:6.5, fontSize:8, bold:true, color:C.gray, fontFace:'Helvetica Neue', charSpacing:2.5 });
             (s.points||[]).slice(0,5).forEach((pt, pi) => {
                 const y = 2.06 + pi * 1.06;
-                slide.addShape(pptx.ShapeType.rect, { x:6.4, y:y+0.04, w:0.18, h:0.18, fill:C.red });
+                slide.addShape(pptx.ShapeType.rect, { x:6.4, y:y+0.04, w:0.18, h:0.18, fill:C.teal });
                 slide.addText(pt || '[Key point]', {
                     x:6.74, y:y, w:6.3, fontSize:13.5, color:C.black,
                     fontFace:'Helvetica Neue', lineSpacingMultiple:1.45 });
@@ -485,8 +485,8 @@ function buildPPTX(deck, projectName, presenterName) {
         }
     });
 
-    const safe = (deck.deck_title || 'deck').replace(/[^a-zA-Z0-9_-]/g, '_');
-    pptx.writeFile({ fileName: `Sinaida_${safe}.pptx` }).catch(err => alert('Download error: ' + err.message));
+    const safe = (deck.deck_title || 'structure').replace(/[^a-zA-Z0-9_-]/g, '_');
+    pptx.writeFile({ fileName: `Structurizer_${safe}.pptx` }).catch(err => alert('Download error: ' + err.message));
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
