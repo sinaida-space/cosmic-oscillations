@@ -181,9 +181,10 @@ if (cursor) {
 
 // Hero button click target
 const heroCta = document.getElementById('hero-cta');
-if(heroCta) heroCta.addEventListener('click', e => {
-    document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
-});
+const hdrCta = document.getElementById('hero-cta-hdr');
+const scrollFn = () => document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
+if(heroCta) heroCta.addEventListener('click', scrollFn);
+if(hdrCta) hdrCta.addEventListener('click', scrollFn);
 
 // ── HEADER ────────────────────────────────────────────────────────
 window.addEventListener('scroll', () => {
