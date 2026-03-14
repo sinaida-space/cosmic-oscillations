@@ -118,7 +118,7 @@
         .prog-count { font-size:13px; font-weight:900; color:var(--white); font-variant-numeric: tabular-nums; }
         .prog-track { height:2px; background:rgba(255,255,255,.05); margin-top:16px; width:100%; position:relative; overflow:hidden; }
         .prog-fill { position:absolute; inset:0; background:var(--red); width:0%; transition:width .6s cubic-bezier(0.4, 0, 0.2, 1); }        /* WIZARD */
-        .wiz-wrap { width: 100%; padding-bottom:160px; }
+        .wiz-wrap { width: 100%; padding: 0 0 160px; }
         .m-side-meta { position:sticky; top:calc(var(--hh) + 120px); }
         .q-label { font-size:12px; font-weight:900; color:var(--red); margin-bottom:12px; display:block; }
         .q-section-name { font-size:10px; font-weight:700; letter-spacing:.32em; text-transform:uppercase; color:var(--muted); }
@@ -152,7 +152,7 @@
         .btn-next:active { transform:translateY(1px) scale(0.96); box-shadow:0 4px 14px rgba(227,6,19,.2); }
 
         /* CONFIRM */
-        .conf-wrap { max-width:580px; margin:0 auto; padding:80px 56px 120px; }
+        .conf-wrap { width: 100%; padding: 0 0 120px; }
         .conf-wrap h2 { font-size:38px; font-weight:800; letter-spacing:-.022em; margin-bottom:6px; }
         .conf-sub { font-size:15px; color:var(--muted); margin-bottom:44px; }
         .field { margin-bottom:20px; }
@@ -176,7 +176,7 @@
         .btn-gen:active { transform:translateY(1px) scale(0.98); box-shadow:0 4px 14px rgba(227,6,19,.2); }
 
         /* LOADING */
-        .load-wrap { padding:140px 56px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:44px; }
+        .load-wrap { width: 100%; padding: 0 0 140px; }
         .orbs { position:relative; width:110px; height:110px; }
         .orb { position:absolute; border-radius:50%; animation:orb 2.4s linear infinite; }
         .o1 { width:16px; height:16px; background:var(--red); top:0; left:50%; margin-left:-8px; }
@@ -188,7 +188,7 @@
         #load-sub { font-size:14px; color:var(--muted); margin-top:8px; }
 
         /* RESULTS */
-        .res-wrap { max-width:680px; margin:0 auto; padding:80px 56px 120px; }
+        .res-wrap { width: 100%; padding: 0 0 120px; }
         .res-wrap h2 { font-size:38px; font-weight:800; letter-spacing:-.022em; margin-bottom:6px; }
         .res-sub { font-size:15px; color:var(--muted); margin-bottom:44px; }
         .slide-list { border:1px solid var(--border); }
@@ -327,13 +327,20 @@
         </div>
     </section>
 
-    <section id="generator">
+    <section class="section" id="generator">
         <div id="prog-wrap" class="prog-wrap hidden">
-            <div class="prog-meta">
-                <span class="prog-label">Building your narrative</span>
-                <span class="prog-count" id="prog-count">01 / 12</span>
+            <div class="m-grid">
+                <div class="m-col-sidebar">
+                    <span class="prog-label">Thinking</span>
+                </div>
+                <div class="m-col-main">
+                    <div class="prog-meta">
+                        <span class="prog-label">Building your narrative</span>
+                        <span class="prog-count" id="prog-count">01 / 12</span>
+                    </div>
+                    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+                </div>
             </div>
-            <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
         </div>
 
         <div id="wizard-view" class="wiz-wrap"></div>
