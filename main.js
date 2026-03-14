@@ -483,9 +483,18 @@ function initThreeJs() {
 
     const renderScene = new RenderPass(scene, camera);
     const bloomPass = new UnrealBloomPass(new THREE.Vector2(container.clientWidth, container.clientHeight), 0.6, 0.4, 0.85);
+    
+    // Crucial for transparent background bloom
+    bloomPass.clearColor = new THREE.Color(0, 0, 0);
+    bloomPass.clearAlpha = 0;
+
     const outputPass = new OutputPass();
 
-    const composer = new EffectComposer(renderer);
+    const renderTarget = new THREE.WebGLRenderTarget(container.clientWidth, container.clientHeight, {
+        type: THREE.HalfFloatType,
+        format: THREE.RGBAFormat
+    });
+    const composer = new EffectComposer(renderer, renderTarget);
     composer.addPass(renderScene);
     composer.addPass(bloomPass);
     composer.addPass(outputPass);
