@@ -22,8 +22,9 @@
         *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
         html { scroll-behavior:smooth; }
         body { font-family:var(--font); background:var(--bg); color:var(--white); overflow-x:hidden; cursor:none; }
-        a { text-decoration:none; color:inherit; }
-        button { font-family:var(--font); cursor:default; }
+        a, button { text-decoration:none; color:inherit; cursor:none !important; }
+        textarea, input { cursor:text !important; }
+        button { font-family:var(--font); }
 
         /* BG */
         #bg-layer { position:fixed; inset:0; z-index:-2;
@@ -45,8 +46,8 @@
             background:var(--white); color:var(--black);
             font-size:11.5px; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
             box-shadow:0 12px 48px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.12);
-            text-align:center; line-height:1.25; padding:0 14px; }
-        a,button,[role=button],.q-chip { cursor:default; }
+            text-align:center; line-height:1.25; padding:0 14px; opacity:1; }
+        a,button,[role=button],.q-chip { cursor:none !important; }
 
         /* HEADER */
         header { position:fixed; top:0; left:0; right:0; height:var(--hh);
