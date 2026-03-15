@@ -189,7 +189,9 @@ if(hdrCta) hdrCta.addEventListener('click', scrollFn);
 
 // ── HEADER ────────────────────────────────────────────────────────
 window.addEventListener('scroll', () => {
-    document.getElementById('hdr').style.borderBottomColor = window.scrollY > 10 ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.06)';
+    const hdr = document.getElementById('hdr');
+    if (window.scrollY > 20) hdr.classList.add('scrolled');
+    else hdr.classList.remove('scrolled');
 });
 
 // ── COOKIE ────────────────────────────────────────────────────────
@@ -234,26 +236,26 @@ function renderStep(idx) {
     const wv = document.getElementById('wizard-view');
     wv.classList.remove('hidden');
     wv.innerHTML = `
-        <div class="m-grid">
-            <div class="m-col-sidebar">
-                <div class="m-side-meta">
-                    <span class="q-label">${q.num} / 12</span>
-                    <span class="q-section-name">${q.slide}</span>
+        <div class="wiz-layout">
+            <aside class="wiz-side">
+                <div class="q-meta">
+                    <span class="q-num-label">${q.num} / 12</span>
+                    <span class="q-cat">${q.slide}</span>
                 </div>
-            </div>
-            <div class="m-col-main">
+            </aside>
+            <div class="wiz-main">
                 <p class="q-opener">${q.opener}</p>
-                <h2 class="q-title" style="font-family:var(--font-serif); font-size:clamp(42px,5vw,72px); font-weight:400; line-height:1.0; margin-bottom:48px;">${q.title}</h2>
-                <p class="q-guidance" style="font-family:var(--font-sans); font-size:18px; line-height:1.7; color:var(--dim); margin-bottom:48px; max-width:640px;">${q.guidance}</p>
+                <h2 class="q-title">${q.title}</h2>
+                <p class="q-guidance">${q.guidance}</p>
                 <div class="chips">${q.chips.map(c => `<span class="q-chip" data-chip="${c.replace(/"/g,'&quot;')}">${c}</span>`).join('')}</div>
-                <textarea id="q-ta" placeholder="${q.placeholder}" style="width:100%; height:200px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:12px; padding:24px; color:var(--white); font-family:var(--font-sans); font-size:16px; line-height:1.6; resize:none; outline:none; transition:border-color .3s;"></textarea>
-                <div class="char-meta" style="margin-top:16px; display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); font-weight:700; letter-spacing:0.05em;">
-                    <button class="btn-improve" id="btn-improve" style="background:none; border:none; color:var(--teal); text-transform:uppercase; letter-spacing:0.1em; font-weight:700;">✦ Refine this answer</button>
+                <textarea id="q-ta" placeholder="${q.placeholder}"></textarea>
+                <div class="wiz-controls">
+                    <button class="btn-refine" id="btn-improve">✦ Refine this answer</button>
                     <span><span id="char-n">${(S.ans[q.id]||'').length}</span> characters</span>
                 </div>
-                <div class="wiz-nav" style="margin-top:64px; display:flex; gap:20px;">
-                    <button class="btn-back" id="btn-back" style="visibility:${idx===0?'hidden':'visible'}; background:none; border:1px solid var(--border); color:var(--dim); padding:18px 32px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em;">Back</button>
-                    <button class="btn-next" id="btn-next" style="background:var(--teal); color:var(--black); border:none; padding:18px 48px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; flex:1; transition:all .3s;">${idx===11?'Review structure →':'Continue →'}</button>
+                <div class="wiz-nav">
+                    <button class="btn-ghost" id="btn-back" style="visibility:${idx===0?'hidden':'visible'}">Back</button>
+                    <button class="btn-next" id="btn-next">${idx===11?'Review structure →':'Continue →'}</button>
                 </div>
             </div>
         </div>`;
@@ -405,11 +407,11 @@ function fallback(st) {
 function showResults(deck) {
     show('result-view');
     document.getElementById('slide-preview').innerHTML = deck.slides.map((s, i) => `
-        <div class="slide-row" style="background:rgba(255,255,255,0.01); border:1px solid var(--border); border-radius:8px; margin-bottom:12px; padding:32px; display:flex; gap:32px; align-items:center;">
-            <div class="slide-num" style="font-family:var(--font-serif); font-size:32px; color:var(--teal); border-right:1px solid var(--border); padding-right:32px; min-width:80px; text-align:center;">${String(s.n || i+1).padStart(2,'0')}</div>
-            <div style="flex:1">
-                <div class="slide-title" style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.2em; color:var(--muted); margin-bottom:8px;">${s.title}</div>
-                <div class="slide-sub" style="font-family:var(--font-serif); font-size:24px; line-height:1.2; color:var(--white);">${s.headline || s.insight || ''}</div>
+        <div class="res-row">
+            <div class="res-num">${String(s.n || i+1).padStart(2,'0')}</div>
+            <div>
+                <div class="res-label">${s.title}</div>
+                <div class="res-title">${s.headline || s.insight || ''}</div>
             </div>
         </div>`).join('');
 }
