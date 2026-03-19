@@ -281,16 +281,21 @@ function renderStep(idx) {
 
 function showConfirm() { show('confirm-view'); document.getElementById('prog-wrap').classList.add('hidden'); }
 
-document.getElementById('ans-toggle').onclick = () => {
-    const list = document.getElementById('ans-list');
-    const open = list.classList.toggle('open');
-    document.getElementById('ans-arrow').textContent = open ? '↑' : '↓';
-    if (open) list.innerHTML = Q.map(q => `
-        <div class="ans-row">
-            <div class="ans-q">${q.num}. ${q.slide}</div>
-            <div class="ans-a">${S.ans[q.id] || '<em style="color:rgba(255,255,255,.25)">Not answered</em>'}</div>
-        </div>`).join('');
-};
+const ansToggle = document.getElementById('ans-toggle');
+if (ansToggle) {
+    ansToggle.onclick = () => {
+        const list = document.getElementById('ans-list');
+        if (!list) return;
+        const open = list.classList.toggle('open');
+        const arrow = document.getElementById('ans-arrow');
+        if (arrow) arrow.textContent = open ? '↑' : '↓';
+        if (open) list.innerHTML = Q.map(q => `
+            <div class="ans-row">
+                <div class="ans-q">${q.num}. ${q.slide}</div>
+                <div class="ans-a">${S.ans[q.id] || '<em style="color:rgba(255,255,255,.25)">Not answered</em>'}</div>
+            </div>`).join('');
+    };
+}
 
 // ── GENERATE ──────────────────────────────────────────────────────
 document.getElementById('btn-gen').onclick = async () => {

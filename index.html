@@ -223,6 +223,13 @@
             body { cursor: auto !important; }
             a, button, [role=button], .q-chip { cursor: auto !important; }
         }
+        /* ANSWERS LIST */
+        #ans-list { display: none; width: 100%; max-width: 800px; margin: 0 auto 64px; text-align: left; }
+        #ans-list.open { display: block; }
+        .ans-row { margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+        .ans-q { font-size: 11px; font-weight: 700; color: var(--teal); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .15em; }
+        .ans-a { font-size: 16px; color: var(--dim); line-height: 1.6; white-space: pre-wrap; }
+        #ans-toggle { margin-bottom:32px; cursor:none !important; font-size:12px; font-weight:700; color:var(--teal); text-transform:uppercase; letter-spacing:.2em; display:flex; align-items:center; gap:8px; justify-content:center; }
     </style>
 </head>
 <body>
@@ -307,6 +314,8 @@
                 <h2 class="q-title">Your deck is ready.</h2>
                 <p class="q-guidance">Here's your narrative arc — 12 slides + 1 verification guide.</p>
                 <div class="res-grid" id="slide-preview"></div>
+                <div id="ans-toggle">Review your answers <span id="ans-arrow">↓</span></div>
+                <div id="ans-list"></div>
                 <button class="btn-action" id="btn-dl">Download PPTX →</button>
                 <button class="btn-ghost" id="btn-restart" style="margin-top:32px">Start a new project</button>
             </div>
@@ -364,6 +373,6 @@
     </div>
 </div>
 
-<script type="module" src="/main.js"></script>
+<script type="module" src="./main.js"></script>
 </body>
 </html>
