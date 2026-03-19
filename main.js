@@ -1,4 +1,4 @@
-import PptxGenJS from 'pptxgenjs';
+import PptxGenJS from 'https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/+esm';
 
 // ── STATE ─────────────────────────────────────────────────────────
 const S = {
